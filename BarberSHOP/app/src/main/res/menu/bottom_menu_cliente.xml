@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_home_cliente"
+        android:title="Inicio"
+        android:icon="@drawable/home_gris" />
+
+    <item
+        android:id="@+id/nav_barberias"
+        android:title="Barberías"
+        android:icon="@drawable/tienda" />
+
+    <item
+        android:id="@+id/nav_citas"
+        android:title="Citas"
+        android:icon="@drawable/reservas" />
+
+    <item
+        android:id="@+id/nav_mensajes"
+        android:title="Mensajes"
+        android:icon="@drawable/mensaje_gris" />
+
+    <item
+        android:id="@+id/nav_perfil_cliente"
+        android:title="Perfil"
+        android:icon="@drawable/perfil_gris" />
+
+</menu>

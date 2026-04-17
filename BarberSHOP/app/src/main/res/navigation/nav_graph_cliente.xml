@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph_cliente"
+    app:startDestination="@id/nav_home_cliente">
+
+    <fragment
+        android:id="@+id/nav_home_cliente"
+        android:name="com.mar0empire.barbershop.main.fragments.cliente.HomeClienteFragment"
+        android:label="Inicio"/>
+
+    <fragment
+        android:id="@+id/nav_barberias"
+        android:name="com.mar0empire.barbershop.main.fragments.cliente.BarberiasFragment"
+        android:label="Barberias"/>
+
+    <fragment
+        android:id="@+id/nav_citas"
+        android:name="com.mar0empire.barbershop.main.fragments.cliente.CitasFragment"
+        android:label="Citas"/>
+
+    <fragment
+        android:id="@+id/nav_mensajes"
+        android:name="com.mar0empire.barbershop.main.fragments.cliente.MensajesFragment"
+        android:label="Mensajes"/>
+
+    <fragment
+        android:id="@+id/nav_perfil_cliente"
+        android:name="com.mar0empire.barbershop.main.fragments.cliente.PerfilClienteFragment"
+        android:label="Perfil"/>
+
+</navigation>

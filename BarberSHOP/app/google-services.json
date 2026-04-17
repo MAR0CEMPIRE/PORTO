@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "209134444258",
+    "project_id": "barbershoptfg",
+    "storage_bucket": "barbershoptfg.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:209134444258:android:d34b191f9a52392e20c8bb",
+        "android_client_info": {
+          "package_name": "com.mar0empire.barbershop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7FAKbX6QwDzd3xOpD-NcmK28-PZTzFR4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

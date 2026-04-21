@@ -100,6 +100,7 @@
         app:layout_constraintTop_toBottomOf="@+id/tv_recover"/>
 
     <!-- Google -->
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/login_google"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"

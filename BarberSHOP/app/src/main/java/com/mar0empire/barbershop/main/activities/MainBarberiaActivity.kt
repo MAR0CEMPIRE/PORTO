@@ -33,10 +33,16 @@ class MainBarberiaActivity : AppCompatActivity() {
         navController = navHostFragment.navController
         binding.bottomNavBarberia.setupWithNavController(navController)
 
-        // Evitar recargar el fragmento si ya estamos en él
         binding.bottomNavBarberia.setOnItemSelectedListener { item ->
             if (item.itemId != navController.currentDestination?.id) {
-                navController.navigate(item.itemId)
+                // Volver al inicio del backstack y navegar al destino
+                navController.popBackStack(
+                    navController.graph.startDestinationId,
+                    false
+                )
+                if (item.itemId != navController.graph.startDestinationId) {
+                    navController.navigate(item.itemId)
+                }
             }
             true
         }

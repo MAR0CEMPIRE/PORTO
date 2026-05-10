@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -54,15 +55,16 @@ class UbicacionFragment : Fragment(), OnMapReadyCallback {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
-        // Inicializar mapa
-        val mapFragment = childFragmentManager.findFragmentById(R.id.mapContainer) as? SupportMapFragment
-            ?: SupportMapFragment.newInstance().also {
-                childFragmentManager.beginTransaction()
-                    .replace(R.id.mapContainer, it)
-                    .commit()
-            }
-        mapFragment.getMapAsync(this)
+        // ⚠️ SOLO PARA DEPURAR — ELIMINAR DESPUÉS
+        val apiKey = requireContext().packageManager
+            .getApplicationInfo(requireContext().packageName, PackageManager.GET_META_DATA)
+            .metaData?.getString("com.google.android.geo.API_KEY")
+        Log.d("MAPS_KEY", "API Key: $apiKey")
 
+        // Inicializar mapa — ahora el fragment ya existe en el XML
+        val mapFragment = childFragmentManager
+            .findFragmentById(R.id.mapContainer) as SupportMapFragment
+        mapFragment.getMapAsync(this)
         initListeners()
     }
 

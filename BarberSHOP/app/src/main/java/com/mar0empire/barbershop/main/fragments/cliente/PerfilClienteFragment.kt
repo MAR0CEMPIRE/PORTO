@@ -21,7 +21,7 @@ import com.mar0empire.barbershop.databinding.FragmentPerfilClienteBinding
 import com.mar0empire.barbershop.main.activities.IdiomaActivity
 import com.mar0empire.barbershop.main.activities.NotificacionesActivity
 import com.mar0empire.barbershop.main.activities.PrivacidadActivity
-import com.mar0empire.barbershop.main.activities.cliente.EditarPerfilActivity
+import com.mar0empire.barbershop.main.fragments.cliente.EditarPerfilActivity
 import com.mar0empire.barbershop.utils.CloudinaryHelper
 import kotlinx.coroutines.launch
 

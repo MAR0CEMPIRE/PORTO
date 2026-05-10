@@ -14,10 +14,10 @@
         android:iconTint="?attr/colorSurface"/>
 
     <item
-        android:id="@+id/nav_mensajes"
+        android:id="@+id/nav_mensajes_barbero"
         android:title="Mensajes"
         android:icon="@drawable/mensaje_gris"
-        android:iconTint="@color/white" />
+        android:iconTint="?attr/colorSurface" />
 
     <item
         android:id="@+id/nav_perfil_barbero"

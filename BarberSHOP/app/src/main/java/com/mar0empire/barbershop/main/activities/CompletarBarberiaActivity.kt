@@ -1,4 +1,4 @@
-package com.mar0empire.barbershop.main.activities.barberia
+package com.mar0empire.barbershop.main.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -10,19 +10,26 @@ class CompletarBarberiaActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCompletarBarberiaBinding
 
+    companion object {
+        const val EXTRA_PASO = "extra_paso"
+        const val PASO_DATOS = "datos"
+        const val PASO_HORARIOS = "horarios"
+        const val PASO_SERVICIOS = "servicios"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCompletarBarberiaBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setupToolbar()
+        navegarAlPaso()
     }
 
     private fun setupToolbar() {
         setSupportActionBar(binding.toolbarCompletar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        // Cambiar el título según el fragment actual
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_setup_barberia) as NavHostFragment
 
@@ -32,11 +39,43 @@ class CompletarBarberiaActivity : AppCompatActivity() {
             }
     }
 
-    // Botón atrás del toolbar
-    override fun onSupportNavigateUp(): Boolean {
+    private fun navegarAlPaso() {
+        val paso = intent.getStringExtra(EXTRA_PASO) ?: return
+
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_setup_barberia) as NavHostFragment
 
+        val navController = navHostFragment.navController
+
+        // Esperamos a que el NavController esté listo
+        navController.addOnDestinationChangedListener(
+            object : androidx.navigation.NavController.OnDestinationChangedListener {
+                override fun onDestinationChanged(
+                    controller: androidx.navigation.NavController,
+                    destination: androidx.navigation.NavDestination,
+                    arguments: android.os.Bundle?
+                ) {
+                    // Solo navegamos la primera vez
+                    navController.removeOnDestinationChangedListener(this)
+
+                    when (paso) {
+                        PASO_HORARIOS -> navController.navigate(R.id.action_datosBasicos_to_ubicacion).also {
+                            navController.navigate(R.id.action_ubicacion_to_horarios)
+                        }
+                        PASO_SERVICIOS -> navController.navigate(R.id.action_datosBasicos_to_ubicacion).also {
+                            navController.navigate(R.id.action_ubicacion_to_horarios)
+                            navController.navigate(R.id.action_horarios_to_servicios)
+                        }
+                        // PASO_DATOS → se queda en el primer paso por defecto
+                    }
+                }
+            }
+        )
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_setup_barberia) as NavHostFragment
         return navHostFragment.navController.navigateUp() || super.onSupportNavigateUp()
     }
 }

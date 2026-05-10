@@ -26,7 +26,8 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
+        manifestPlaceholders["AIzaSyCn5aaFDPiiIx4P8pJiEVITEnBK-r0ef1s"] =
+            project.findProperty("AIzaSyCn5aaFDPiiIx4P8pJiEVITEnBK-r0ef1s") ?: ""
         // Usar localProperties para leer las claves
         buildConfigField("String", "CLOUDINARY_CLOUD_NAME", "\"${localProperties.getProperty("CLOUDINARY_CLOUD_NAME") ?: ""}\"")
         buildConfigField("String", "CLOUDINARY_UPLOAD_PRESET", "\"${localProperties.getProperty("CLOUDINARY_UPLOAD_PRESET") ?: ""}\"")

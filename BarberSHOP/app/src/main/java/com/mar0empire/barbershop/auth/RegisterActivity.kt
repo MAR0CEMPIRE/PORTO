@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mar0empire.barbershop.databinding.ActivityRegisterBinding
-import com.mar0empire.barbershop.main.activities.barberia.CompletarBarberiaActivity
+import com.mar0empire.barbershop.main.activities.CompletarBarberiaActivity
 
 class RegisterActivity : AppCompatActivity(){
     private lateinit var binding: ActivityRegisterBinding

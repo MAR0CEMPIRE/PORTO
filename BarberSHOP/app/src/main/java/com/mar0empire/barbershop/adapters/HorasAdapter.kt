@@ -9,7 +9,7 @@ import com.mar0empire.barbershop.databinding.ItemHoraBinding
 import com.mar0empire.barbershop.models.HoraItem
 
 class HorasAdapter(
-    private val horas: List<HoraItem>,
+    private val horas: MutableList<HoraItem>, // ← MutableList
     private val onHoraClick: (HoraItem) -> Unit
 ) : RecyclerView.Adapter<HorasAdapter.HoraViewHolder>() {
 
@@ -32,7 +32,6 @@ class HorasAdapter(
         holder.binding.txtHora.text = item.hora
 
         if (!item.disponible) {
-            // Hora no disponible
             holder.binding.txtDisponible.text = context.getString(R.string.hora_no_disponible)
             holder.binding.txtDisponible.setTextColor(
                 ContextCompat.getColor(context, R.color.accent_red)
@@ -48,7 +47,6 @@ class HorasAdapter(
             holder.binding.cardHora.isEnabled = true
         }
 
-        // Estado seleccionado
         if (horaSeleccionada == position) {
             holder.binding.cardHora.setCardBackgroundColor(
                 ContextCompat.getColor(context, R.color.black)
@@ -60,7 +58,6 @@ class HorasAdapter(
                 ContextCompat.getColor(context, R.color.gray_600)
             )
         } else {
-            // Fondo blanco y texto negro para el estado no seleccionado
             holder.binding.cardHora.setCardBackgroundColor(
                 ContextCompat.getColor(context, R.color.white)
             )
@@ -81,4 +78,12 @@ class HorasAdapter(
     }
 
     override fun getItemCount() = horas.size
+
+    // ─── Actualizar horas desde fuera ────────────────────────────────────────
+    fun actualizarHoras(nuevasHoras: List<HoraItem>) {
+        horas.clear()
+        horas.addAll(nuevasHoras)
+        horaSeleccionada = -1
+        notifyDataSetChanged()
+    }
 }

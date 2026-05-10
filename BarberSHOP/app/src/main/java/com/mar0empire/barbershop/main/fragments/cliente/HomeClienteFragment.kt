@@ -1,14 +1,20 @@
 package com.mar0empire.barbershop.main.fragments.cliente
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mar0empire.barbershop.adapters.BarberiaHomeAdapter
 import com.mar0empire.barbershop.databinding.FragmentHomeClienteBinding
+import com.mar0empire.barbershop.main.activities.PerfilBarberiaClienteActivity
 import com.mar0empire.barbershop.viewmodel.HomeClienteViewModel
 
 class HomeClienteFragment : Fragment() {
@@ -21,8 +27,19 @@ class HomeClienteFragment : Fragment() {
     private lateinit var adapterDestacadas: BarberiaHomeAdapter
     private lateinit var adapterTop: BarberiaHomeAdapter
 
+    private val pedirPermiso = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        if (concedido) {
+            viewModel.cargarCercanas()
+        } else {
+            viewModel.cargarDestacadas()
+        }
+    }
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeClienteBinding.inflate(inflater, container, false)
@@ -32,34 +49,72 @@ class HomeClienteFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = ViewModelProvider(this).get(HomeClienteViewModel::class.java)
+        viewModel = ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
+        )[HomeClienteViewModel::class.java]
 
         configurarAdapters()
         observarDatos()
+        pedirPermisoUbicacion()
 
-        viewModel.cargarCercanas()
         viewModel.cargarDestacadas()
         viewModel.cargarTop()
     }
 
-    private fun configurarAdapters() {
-        adapterCercanas = BarberiaHomeAdapter()
-        adapterDestacadas = BarberiaHomeAdapter()
-        adapterTop = BarberiaHomeAdapter()
+    private fun pedirPermisoUbicacion() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                viewModel.cargarCercanas()
+            }
+            else -> {
+                pedirPermiso.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
+    }
 
+    private fun abrirPerfilBarberia(barberiaId: String) {
+        startActivity(
+            Intent(requireContext(), PerfilBarberiaClienteActivity::class.java).apply {
+                putExtra(PerfilBarberiaClienteActivity.EXTRA_BARBERIA_ID, barberiaId)
+            }
+        )
+    }
+
+    private fun configurarAdapters() {
+        adapterCercanas = BarberiaHomeAdapter { barberia ->
+            abrirPerfilBarberia(barberia.id)
+        }
+        adapterDestacadas = BarberiaHomeAdapter { barberia ->
+            abrirPerfilBarberia(barberia.id)
+        }
+        adapterTop = BarberiaHomeAdapter { barberia ->
+            abrirPerfilBarberia(barberia.id)
+        }
 
         binding.rvCercanas.apply {
-            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+            layoutManager = LinearLayoutManager(
+                requireContext(),
+                LinearLayoutManager.HORIZONTAL,
+                false
+            )
             adapter = adapterCercanas
         }
 
         binding.rvDestacadas.apply {
-            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+            layoutManager = LinearLayoutManager(
+                requireContext(),
+                LinearLayoutManager.HORIZONTAL,
+                false
+            )
             adapter = adapterDestacadas
         }
 
         binding.rvTop.apply {
-            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+            layoutManager = LinearLayoutManager(requireContext())
             adapter = adapterTop
         }
     }
@@ -68,11 +123,9 @@ class HomeClienteFragment : Fragment() {
         viewModel.cercanas.observe(viewLifecycleOwner) { list ->
             adapterCercanas.submitList(list)
         }
-
         viewModel.destacadas.observe(viewLifecycleOwner) { list ->
             adapterDestacadas.submitList(list)
         }
-
         viewModel.top.observe(viewLifecycleOwner) { list ->
             adapterTop.submitList(list)
         }

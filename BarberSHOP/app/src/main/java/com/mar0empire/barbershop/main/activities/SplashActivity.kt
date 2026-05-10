@@ -11,7 +11,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.mar0empire.barbershop.auth.AuthRepository
 import com.mar0empire.barbershop.auth.LoginActivity
 import com.mar0empire.barbershop.databinding.ActivitySplashBinding
-import com.mar0empire.barbershop.main.activities.barberia.CompletarBarberiaActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

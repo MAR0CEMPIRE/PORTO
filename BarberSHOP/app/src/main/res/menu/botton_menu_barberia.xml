@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_dashboard"
+        android:title="Inicio"
+        android:icon="@drawable/home_gris"
+        android:iconTint="?attr/colorSurface"/>
+
+    <item
+        android:id="@+id/nav_calendario"
+        android:title="Calendario"
+        android:icon="@drawable/reservas"
+        android:iconTint="?attr/colorSurface"/>
+
+    <item
+        android:id="@+id/nav_mensajes"
+        android:title="Mensajes"
+        android:icon="@drawable/mensaje_gris"
+        android:iconTint="@color/white" />
+
+    <item
+        android:id="@+id/nav_perfil_barbero"
+        android:title="Perfil"
+        android:icon="@drawable/perfil_gris"
+        android:iconTint="?attr/colorSurface" />
+
+</menu>

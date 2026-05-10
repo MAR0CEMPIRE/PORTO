@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="220dp"
+    android:layout_width="match_parent"
     android:layout_height="270dp"
-    android:layout_marginEnd="12dp"
+    android:layout_marginBottom="30dp"
     app:cardCornerRadius="16dp"
     app:cardElevation="4dp">
 
@@ -17,6 +17,7 @@
             android:layout_width="0dp"
             android:layout_height="150dp"
             android:scaleType="centerCrop"
+            android:src="@drawable/placeholder_barberia"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -67,7 +68,7 @@
             android:layout_height="wrap_content"
             android:text="Logroño, España"
             android:textSize="13sp"
-            android:textColor="#777"
+            android:textColor="@color/gray_600"
             app:layout_constraintTop_toBottomOf="@id/txtNombre"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>

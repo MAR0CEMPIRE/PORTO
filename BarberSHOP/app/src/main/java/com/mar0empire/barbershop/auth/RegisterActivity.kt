@@ -7,9 +7,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.mar0empire.barbershop.main.MainBarberiaActivity
-import com.mar0empire.barbershop.main.MainClienteActivity
 import com.mar0empire.barbershop.databinding.ActivityRegisterBinding
+import com.mar0empire.barbershop.main.activities.barberia.CompletarBarberiaActivity
 
 class RegisterActivity : AppCompatActivity(){
     private lateinit var binding: ActivityRegisterBinding
@@ -53,7 +52,6 @@ class RegisterActivity : AppCompatActivity(){
         binding.volver.setOnClickListener {
             finish()
         }
-
         //Boton registrar
         binding.btnRegistrar.setOnClickListener {
             registrarUsuario()
@@ -63,8 +61,8 @@ class RegisterActivity : AppCompatActivity(){
     private fun registrarUsuario(){
         val nombre = binding.txtNombre.text.toString().trim()
         val email = binding.txtEmail.text.toString().trim()
-        val password = binding.etPassword.editText?.text.toString().trim()
-        val confirmPassword = binding.etConfirmpassword.editText?.text.toString().trim()
+        val password = binding.txtPassword.text.toString().trim()
+        val confirmPassword = binding.txtConfirmpassword.text.toString().trim()
 
         if(nombre.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()){
             Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
@@ -72,6 +70,10 @@ class RegisterActivity : AppCompatActivity(){
         }
         if(password != confirmPassword){
             Toast.makeText(this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (password.length < 8){
+            Toast.makeText(this, "La contraseña  debe tener almenos 8 caracteres", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -93,20 +95,18 @@ class RegisterActivity : AppCompatActivity(){
         auth.createUserWithEmailAndPassword(email, password)
             .addOnSuccessListener { result ->
                 val uid = result.user?.uid ?: return@addOnSuccessListener
-
-                //Dayos
+                //Datos
                 val userData = hashMapOf(
                     "nombre" to nombre,
                     "email" to email,
                     "rol" to rolSeleccioado
                 )
-
                 //Guardar datos en coleccion users
                 db.collection("users").document(uid).set(userData)
                     .addOnSuccessListener {
                         if(rolSeleccioado == "cliente"){
                             //Redirigir a interfaz del cliente
-                            startActivity(Intent(this, MainClienteActivity::class.java))
+                            Toast.makeText(this, "¡Bienvenido!", Toast.LENGTH_SHORT).show()
                             finish()
                         }else{
                            registrarBarberia(uid)
@@ -138,7 +138,11 @@ class RegisterActivity : AppCompatActivity(){
 
         db.collection("barberia").document(uid).set(barberiaData)
             .addOnSuccessListener {
-                startActivity(Intent(this, MainBarberiaActivity::class.java))
+                startActivity(
+                    Intent(this, CompletarBarberiaActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+                )
                 finish()
             }
             .addOnFailureListener {

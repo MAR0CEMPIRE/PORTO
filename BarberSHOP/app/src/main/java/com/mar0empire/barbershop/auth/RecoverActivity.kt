@@ -37,17 +37,28 @@ class RecoverActivity : AppCompatActivity(){
             enviarCorreoRecuperacion(email)
         }
     }
-
-    private fun enviarCorreoRecuperacion(email: String){
+    private fun enviarCorreoRecuperacion(email: String) {
+        // Desactivamos el botón para evitar múltiples clics
         binding.btnRecover.isEnabled = false
 
-            auth.sendPasswordResetEmail(email)
+        auth.sendPasswordResetEmail(email)
             .addOnSuccessListener {
-                Toast.makeText(this, "Correo de recuperacion enviado", Toast.LENGTH_SHORT).show()
-                finish()
+                Toast.makeText(
+                    this,
+                    "Correo de recuperación enviado a $email",
+                    Toast.LENGTH_LONG
+                ).show()
+                finish() // Cerramos la actividad al tener éxito
             }
-            .addOnFailureListener {
-                Toast.makeText(this, "Error al enviar el correo", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { exception ->
+                // Mostramos el error real
+                Toast.makeText(
+                    this,
+                    "Error: ${exception.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                // Reactivamos el botón para que el usuario pueda intentarlo de nuevo
                 binding.btnRecover.isEnabled = true
             }
     }

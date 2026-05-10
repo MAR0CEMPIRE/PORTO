@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_barberia_setup"
+    app:startDestination="@id/datosBasicosFragment">
+
+    <fragment
+        android:id="@+id/datosBasicosFragment"
+        android:name="com.mar0empire.barbershop.main.fragments.barberia.setup.DatosBasicosFragment"
+        android:label="Datos básicos">
+        <action
+            android:id="@+id/action_datosBasicos_to_ubicacion"
+            app:destination="@id/ubicacionFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/ubicacionFragment"
+        android:name="com.mar0empire.barbershop.main.fragments.barberia.setup.UbicacionFragment"
+        android:label="Ubicación">
+        <action
+            android:id="@+id/action_ubicacion_to_horarios"
+            app:destination="@id/horariosFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/horariosFragment"
+        android:name="com.mar0empire.barbershop.main.fragments.barberia.setup.HorariosFragment"
+        android:label="Horarios">
+        <action
+            android:id="@+id/action_horarios_to_servicios"
+            app:destination="@id/serviciosFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/serviciosFragment"
+        android:name="com.mar0empire.barbershop.main.fragments.barberia.setup.ServiciosFragment"
+        android:label="Servicios">
+        <action
+            android:id="@+id/action_servicios_to_resumen"
+            app:destination="@id/resumenFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/resumenFragment"
+        android:name="com.mar0empire.barbershop.main.fragments.barberia.setup.ResumenFragment"
+        android:label="Resumen"/>
+
+</navigation>

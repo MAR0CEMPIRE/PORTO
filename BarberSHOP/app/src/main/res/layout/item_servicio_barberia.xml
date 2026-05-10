@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:background="@drawable/rounded_edittext"
+    android:layout_marginBottom="12dp">
+
+    <EditText
+        android:id="@+id/etNombreServicio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nombre del servicio"
+        android:textColor="?attr/colorSurface"
+        android:layout_marginTop="10dp"
+        android:textColorHint="@color/gray_600"
+        android:textSize="16sp"/>
+
+    <EditText
+        android:id="@+id/etPrecioServicio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Precio (€)"
+        android:inputType="numberDecimal"
+        android:layout_marginTop="10dp"
+        android:textColor="?attr/colorSurface"
+        android:textColorHint="@color/gray_600"
+        android:textSize="16sp"/>
+
+    <EditText
+        android:id="@+id/etDuracionServicio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Duración (minutos)"
+        android:inputType="number"
+        android:layout_marginTop="10dp"
+        android:textColor="?attr/colorSurface"
+        android:textColorHint="@color/gray_600"
+        android:textSize="16sp"/>
+</LinearLayout>

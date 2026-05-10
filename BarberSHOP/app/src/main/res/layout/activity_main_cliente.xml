@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".main.MainClienteActivity">
+    tools:context=".main.activities.MainClienteActivity">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_cliente"

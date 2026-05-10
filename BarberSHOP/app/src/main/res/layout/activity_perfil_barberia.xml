@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Este ACTIVITY es lo que vera el cliente al entrar al perfil de una barberia -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/img_barberia"
+            android:layout_width="0dp"
+            android:layout_height="250dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/placeholder_barberia"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ic_share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/circle_button"
+            android:layout_marginTop="10dp"
+            android:clickable="true"
+            android:padding="5dp"
+            android:src="@drawable/ic_compartir"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/gray_400" />
+
+        <ImageView
+            android:id="@+id/ic_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/circle_button"
+            android:layout_marginTop="10dp"
+            android:padding="5dp"
+            android:clickable="true"
+            android:src="@drawable/baseline_arrow_back_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/gray_400" />
+
+        <!-- Nombre -->
+        <TextView
+            android:id="@+id/txt_nombre_barberia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="King BarberSHOP"
+            android:letterSpacing="0.0"
+            android:textAllCaps="true"
+            android:textSize="24sp"
+            android:layout_marginHorizontal="20dp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorPrimary"
+            android:fontFamily="@font/montserrat_bold"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@+id/img_barberia"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <!-- Ubicación -->
+        <TextView
+            android:id="@+id/txt_ubicacion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Los Ángeles, CA"
+            android:layout_marginTop="10dp"
+            android:textSize="14sp"
+            android:layout_marginHorizontal="20dp"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txt_nombre_barberia" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginHorizontal="20dp"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/img_barberia">
+
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:src="@drawable/estrella"/>
+
+            <TextView
+                android:id="@+id/txt_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:text="5.0"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="18sp"/>
+        </LinearLayout>
+
+        <!-- Boton de reserva + chat -->
+
+        <LinearLayout
+            android:id="@+id/ll_reservar"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/rounded_edittext"
+            android:gravity="center"
+            android:padding="20dp"
+            android:layout_marginHorizontal="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txt_ubicacion">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_calendario"
+                app:tint="?attr/colorSurface" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:drawablePadding="10dp"
+                android:text="Reservar cita"
+                android:textColor="?attr/colorSurface"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_chat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/rounded_buttonwhite"
+            android:gravity="center"
+            android:padding="20dp"
+            android:layout_marginHorizontal="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txt_ubicacion">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_chat"
+                app:tint="?attr/colorPrimary" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/separacion1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/gray_600"
+            android:layout_marginTop="40dp"
+            app:layout_constraintTop_toBottomOf="@+id/ll_reservar" />
+
+        <HorizontalScrollView
+            android:id="@+id/scroll_seccion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:overScrollMode="never"
+            android:scrollbars="none"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@+id/separacion1">
+
+            <LinearLayout
+                android:id="@+id/ll_secciones"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="20dp">
+
+                <TextView
+                    android:id="@+id/seccion_portfolio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Portfolio"
+                    android:textSize="16sp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:textStyle="bold"
+                    android:padding="15dp"
+                    android:textColor="@color/white"
+                    android:background="@drawable/bg_section_selected"
+                    android:layout_marginEnd="10dp"/>
+
+                <TextView
+                    android:id="@+id/seccion_servicios"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Servicios"
+                    android:textSize="16sp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:textStyle="bold"
+                    android:padding="15dp"
+                    android:textColor="@color/white"
+                    android:background="@drawable/bg_section_noselected"
+                    android:layout_marginEnd="10dp"/>
+                <TextView
+                    android:id="@+id/seccion_reviews"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Reviews"
+                    android:textSize="16sp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:textStyle="bold"
+                    android:padding="15dp"
+                    android:textColor="@color/white"
+                    android:background="@drawable/bg_section_noselected"
+                    android:layout_marginEnd="10dp"/>
+
+                <TextView
+                    android:id="@+id/seccion_about"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/bg_section_noselected"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="15dp"
+                    android:text="Conocenos"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <View
+            android:id="@+id/separacion2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/gray_600"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@+id/scroll_seccion"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="400dp"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/separacion2">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Portfolio"
+                android:textColor="?attr/colorOnBackground"/>
+
+        </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

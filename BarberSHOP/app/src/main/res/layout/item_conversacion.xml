@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="12dp">
+
+    <!-- Avatar -->
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/img_avatar"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:src="@drawable/avatar_perfil"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <!-- Nombre -->
+    <TextView
+        android:id="@+id/txt_nombre"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/montserrat_bold"
+        android:textColor="?attr/colorOnBackground"
+        android:textSize="15sp"
+        tools:text="King BarberSHOP"
+        app:layout_constraintEnd_toStartOf="@+id/txt_hora"
+        app:layout_constraintStart_toEndOf="@+id/img_avatar"
+        app:layout_constraintTop_toTopOf="@+id/img_avatar"/>
+
+    <!-- Último mensaje -->
+    <TextView
+        android:id="@+id/txt_ultimo_mensaje"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/gray_700"
+        android:textSize="13sp"
+        tools:text="Tu cita está confirmada para mañana"
+        app:layout_constraintEnd_toStartOf="@+id/badge_no_leidos"
+        app:layout_constraintStart_toEndOf="@+id/img_avatar"
+        app:layout_constraintTop_toBottomOf="@+id/txt_nombre"/>
+
+    <!-- Hora -->
+    <TextView
+        android:id="@+id/txt_hora"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/gray_600"
+        android:textSize="12sp"
+        tools:text="12:30"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/txt_nombre"/>
+
+    <!-- Badge mensajes no leídos -->
+    <TextView
+        android:id="@+id/badge_no_leidos"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="@drawable/bg_badge"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        tools:text="3"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@+id/txt_ultimo_mensaje"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/txt_ultimo_mensaje"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

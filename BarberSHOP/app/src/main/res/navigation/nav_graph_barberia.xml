@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph_barberia"
+    app:startDestination="@id/nav_dashboard">
+
+    <!-- DASHBOARD -->
+    <fragment
+        android:id="@+id/nav_dashboard"
+        android:name="com.mar0empire.barbershop.main.fragments.barberia.DashboardFragment"
+        android:label="Dashboard" />
+
+    <!-- CALENDARIO -->
+    <fragment
+        android:id="@+id/nav_calendario"
+        android:name="com.mar0empire.barbershop.main.fragments.barberia.CalendarioFragment"
+        android:label="Calendario" />
+
+    <!-- MENSAJES -->
+    <fragment
+        android:id="@+id/nav_mensajes_barbero"
+        android:name="com.mar0empire.barbershop.main.fragments.comun.MensajesFragment"
+        android:label="Mensajes" />
+
+    <!-- PERFIL -->
+    <fragment
+        android:id="@+id/nav_perfil_barbero"
+        android:name="com.mar0empire.barbershop.main.fragments.barberia.PerfilBarberoFragment"
+        android:label="Perfil" />
+
+</navigation>

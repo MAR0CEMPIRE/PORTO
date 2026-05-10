@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">BarberSHOP</string>
+    <string name="hora_no_disponible">No disponible</string>
+    <string name="hora_disponible">Disponible</string>
+    <string name="citas_empty">No tienes citas</string>
+
 </resources>

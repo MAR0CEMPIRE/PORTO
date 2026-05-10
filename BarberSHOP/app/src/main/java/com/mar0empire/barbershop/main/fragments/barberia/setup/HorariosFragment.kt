@@ -14,13 +14,13 @@ import com.google.android.material.switchmaterial.SwitchMaterial
 import com.mar0empire.barbershop.R
 import com.mar0empire.barbershop.databinding.FragmentBarberiaHorariosBinding
 import com.mar0empire.barbershop.models.HorarioDia
-import com.mar0empire.barbershop.viewmodel.SetupBarberiaViewModel
+import com.mar0empire.barbershop.viewmodel.SetUpBarberiaViewModel
 
 class HorariosFragment : Fragment() {
 
     private var _binding: FragmentBarberiaHorariosBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: SetupBarberiaViewModel by activityViewModels()
+    private val viewModel: SetUpBarberiaViewModel by activityViewModels()
 
     private val horariosActuales = mutableListOf<HorarioDia>()
 

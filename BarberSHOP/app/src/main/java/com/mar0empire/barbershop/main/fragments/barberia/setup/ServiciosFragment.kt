@@ -13,14 +13,14 @@ import com.google.android.material.textfield.TextInputEditText
 import com.mar0empire.barbershop.R
 import com.mar0empire.barbershop.databinding.FragmentBarberiaServiciosBinding
 import com.mar0empire.barbershop.models.Servicio
-import com.mar0empire.barbershop.viewmodel.SetupBarberiaViewModel
+import com.mar0empire.barbershop.viewmodel.SetUpBarberiaViewModel
 import java.util.UUID
 
 class ServiciosFragment : Fragment() {
 
     private var _binding: FragmentBarberiaServiciosBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: SetupBarberiaViewModel by activityViewModels()
+    private val viewModel: SetUpBarberiaViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentBarberiaServiciosBinding.inflate(inflater, container, false)

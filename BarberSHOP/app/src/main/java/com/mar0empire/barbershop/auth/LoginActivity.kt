@@ -9,7 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.mar0empire.barbershop.databinding.ActivityLoginBinding
 import com.mar0empire.barbershop.main.activities.MainBarberiaActivity
 import com.mar0empire.barbershop.main.activities.MainClienteActivity
-import com.mar0empire.barbershop.main.barberia.setup.CompletarBarberiaActivity
+import com.mar0empire.barbershop.main.activities.barberia.CompletarBarberiaActivity
 
 class LoginActivity : AppCompatActivity() {
 

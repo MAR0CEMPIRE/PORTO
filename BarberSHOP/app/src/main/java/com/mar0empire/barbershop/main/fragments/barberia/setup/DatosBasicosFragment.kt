@@ -19,14 +19,14 @@ import com.bumptech.glide.Glide
 import com.mar0empire.barbershop.R
 import com.mar0empire.barbershop.databinding.FragmentBarberiaDatosBasicosBinding
 import com.mar0empire.barbershop.utils.CloudinaryHelper
-import com.mar0empire.barbershop.viewmodel.SetupBarberiaViewModel
+import com.mar0empire.barbershop.viewmodel.SetUpBarberiaViewModel
 import kotlinx.coroutines.launch
 
 class DatosBasicosFragment : Fragment() {
 
     private var _binding: FragmentBarberiaDatosBasicosBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: SetupBarberiaViewModel by activityViewModels()
+    private val viewModel: SetUpBarberiaViewModel by activityViewModels()
 
     private val pedirPermiso = registerForActivityResult(
         ActivityResultContracts.RequestPermission()

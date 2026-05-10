@@ -52,7 +52,7 @@ class DashboardFragment : Fragment() {
     private fun cargarDatosBarberia() {
         val uid = auth.currentUser?.uid ?: return
 
-        db.collection("barberias").document(uid)
+        db.collection("barberia").document(uid)
             .get()
             .addOnSuccessListener { doc ->
                 if (!doc.exists()) return@addOnSuccessListener
@@ -75,7 +75,7 @@ class DashboardFragment : Fragment() {
     private fun cargarServicios() {
         val uid = auth.currentUser?.uid ?: return
 
-        db.collection("barberias").document(uid)
+        db.collection("barberia").document(uid)
             .get()
             .addOnSuccessListener { doc ->
                 val servicios = doc.get("servicios") as? List<*> ?: emptyList<Any>()
@@ -96,7 +96,7 @@ class DashboardFragment : Fragment() {
 
                 val lista = docs.documents.map { doc ->
                     CitaBarbero(
-                        cliente = doc.getString("clienteNombre") ?: "",
+                        cliente = doc.getString("nombreCliente") ?: "",
                         hora = doc.getString("hora") ?: "",
                         servicio = doc.getString("servicio") ?: "",
                         precio = doc.getDouble("precio") ?: 0.0

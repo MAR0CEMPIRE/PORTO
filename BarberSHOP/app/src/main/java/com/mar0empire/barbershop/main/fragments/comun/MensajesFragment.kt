@@ -107,7 +107,7 @@ class MensajesFragment : Fragment() {
                     }
 
                     val uidDestino = chatId
-                        .split("_")
+                        .split("__")
                         .firstOrNull { it != uid } ?: run {
                         completados++
                         return@forEach

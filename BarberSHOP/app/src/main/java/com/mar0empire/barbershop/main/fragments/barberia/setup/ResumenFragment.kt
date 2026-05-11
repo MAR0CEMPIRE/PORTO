@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mar0empire.barbershop.auth.LoginActivity
 import com.mar0empire.barbershop.databinding.FragmentBarberiaResumenBinding
+import com.mar0empire.barbershop.main.activities.MainBarberiaActivity
 import com.mar0empire.barbershop.viewmodel.SetUpBarberiaViewModel
 
 class ResumenFragment : Fragment() {
@@ -25,8 +26,7 @@ class ResumenFragment : Fragment() {
     private val db = FirebaseFirestore.getInstance()
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentBarberiaResumenBinding.inflate(inflater, container, false)
@@ -41,7 +41,9 @@ class ResumenFragment : Fragment() {
 
     private fun mostrarResumen() {
         val container = binding.containerResumen
-        agregarFila(container, "Nombre barbería", viewModel.nombre)
+        container.removeAllViews()
+
+        agregarFila(container, "Nombre", viewModel.nombre)
         agregarFila(container, "Teléfono", viewModel.telefono)
         agregarFila(container, "Descripción", viewModel.descripcion)
         agregarFila(container, "Ubicación",
@@ -74,17 +76,20 @@ class ResumenFragment : Fragment() {
 
     private fun finalizarRegistro() {
         binding.btnFinalizar.isEnabled = false
-        binding.btnFinalizar.text = "Creando cuenta..."
+        binding.btnFinalizar.text = "Guardando..."
 
-        // Si viene del registro nuevo → crear cuenta primero
+        // Si viene del registro nuevo -> crear cuenta primero
         if (viewModel.emailRegistro.isNotEmpty()) {
             crearCuentaYGuardar()
         } else {
-            // Viene de editar perfil → solo actualizar datos
-            guardarDatosEnFirestore(auth.currentUser?.uid ?: return)
+            // Viene de editar perfil -> solo actualizar datos con uid actual
+            val uid = auth.currentUser?.uid ?: run {
+                Toast.makeText(requireContext(), "Error: no hay sesión activa", Toast.LENGTH_SHORT).show()
+                return
+            }
+            guardarDatosEnFirestore(uid, esRegistroNuevo = false)
         }
     }
-
 
     private fun crearCuentaYGuardar() {
         auth.createUserWithEmailAndPassword(
@@ -93,7 +98,6 @@ class ResumenFragment : Fragment() {
         ).addOnSuccessListener { result ->
             val uid = result.user?.uid ?: return@addOnSuccessListener
 
-            // Guardar usuario en colección users
             db.collection("users").document(uid).set(
                 hashMapOf(
                     "nombre" to viewModel.nombreUsuario,
@@ -101,7 +105,7 @@ class ResumenFragment : Fragment() {
                     "rol" to "barberia"
                 )
             ).addOnSuccessListener {
-                guardarDatosEnFirestore(uid)
+                guardarDatosEnFirestore(uid, esRegistroNuevo = true)
             }.addOnFailureListener {
                 mostrarError("Error al guardar el usuario")
             }
@@ -110,8 +114,7 @@ class ResumenFragment : Fragment() {
         }
     }
 
-
-    private fun guardarDatosEnFirestore(uid: String) {
+    private fun guardarDatosEnFirestore(uid: String, esRegistroNuevo: Boolean) {
         val horariosMapa = viewModel.horarios.map { horario ->
             mapOf(
                 "dia" to horario.dia,
@@ -146,15 +149,33 @@ class ResumenFragment : Fragment() {
         db.collection("barberia").document(uid)
             .set(datos)
             .addOnSuccessListener {
-            // Cerrar sesión para que tenga que hacer login
-            auth.signOut()
-            Toast.makeText(requireContext(), "¡Cuenta creada! Inicia sesión para continuar.", Toast.LENGTH_LONG).show()
-            startActivity(
-                Intent(requireContext(), LoginActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                if (esRegistroNuevo) {
+
+                    auth.signOut()
+                    Toast.makeText(
+                        requireContext(),
+                        "¡Cuenta creada! Inicia sesión para continuar.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    startActivity(
+                        Intent(requireContext(), LoginActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        }
+                    )
+                } else {
+                    // Edición -> volver al dashboard sin cerrar sesión
+                    Toast.makeText(
+                        requireContext(),
+                        "¡Datos actualizados! ✓",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    startActivity(
+                        Intent(requireContext(), MainBarberiaActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        }
+                    )
                 }
-            )
-        }
+            }
             .addOnFailureListener {
                 mostrarError("Error al guardar los datos")
             }

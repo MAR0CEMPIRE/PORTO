@@ -9,7 +9,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mar0empire.barbershop.adapters.HorasAdapter
 import com.mar0empire.barbershop.databinding.ActivityReservarCitaBinding
-import com.mar0empire.barbershop.models.Cita
 import com.mar0empire.barbershop.models.HoraItem
 import com.mar0empire.barbershop.utils.NotificacionHelper
 import java.text.SimpleDateFormat
@@ -23,14 +22,13 @@ class ReservarCitaActivity : AppCompatActivity() {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
 
-    // Datos recibidos por Intent
     private lateinit var barberiaId: String
     private lateinit var nombreBarberia: String
     private lateinit var fotoBarberia: String
     private lateinit var ubicacionBarberia: String
 
-    // Estado de la reserva
     private var servicioSeleccionado: String = ""
+    private var precioSeleccionado: Double = 0.0 
     private var fechaSeleccionada: Long = System.currentTimeMillis()
     private var horaSeleccionada: String = ""
     private lateinit var horasAdapter: HorasAdapter
@@ -47,11 +45,7 @@ class ReservarCitaActivity : AppCompatActivity() {
         binding = ActivityReservarCitaBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Recibir datos de la barbería
-        barberiaId = intent.getStringExtra(EXTRA_BARBERIA_ID) ?: run {
-            finish()
-            return
-        }
+        barberiaId = intent.getStringExtra(EXTRA_BARBERIA_ID) ?: run { finish(); return }
         nombreBarberia = intent.getStringExtra(EXTRA_BARBERIA_NOMBRE) ?: ""
         fotoBarberia = intent.getStringExtra(EXTRA_BARBERIA_FOTO) ?: ""
         ubicacionBarberia = intent.getStringExtra(EXTRA_BARBERIA_UBICACION) ?: ""
@@ -61,27 +55,23 @@ class ReservarCitaActivity : AppCompatActivity() {
         initListeners()
     }
 
-
     private fun setupHorasRecycler() {
         horasAdapter = HorasAdapter(mutableListOf()) { horaItem ->
             horaSeleccionada = horaItem.hora
         }
-
         binding.rvHoras.layoutManager = GridLayoutManager(
             this, 2, GridLayoutManager.HORIZONTAL, false
         )
         binding.rvHoras.adapter = horasAdapter
-
-        // Cargar horas por defecto para el día de hoy
         cargarHorasDisponibles(fechaSeleccionada)
     }
-
 
     private fun cargarServicios() {
         db.collection("barberia").document(barberiaId)
             .get()
             .addOnSuccessListener { doc ->
-                val servicios = doc.get("servicios") as? List<Map<String, Any>> ?: return@addOnSuccessListener
+                val servicios = doc.get("servicios") as? List<Map<String, Any>>
+                    ?: return@addOnSuccessListener
 
                 binding.chipGroupServicios.removeAllViews()
 
@@ -95,29 +85,33 @@ class ReservarCitaActivity : AppCompatActivity() {
                         isCheckable = true
                         setChipBackgroundColorResource(android.R.color.transparent)
                         setOnCheckedChangeListener { _, isChecked ->
-                            if (isChecked) servicioSeleccionado = nombre
+                            if (isChecked) {
+                                servicioSeleccionado = nombre
+                                precioSeleccionado = precio // ✅
+                            }
                         }
                     }
-                    binding.chipGroupServicios.addView(chip)                }
+                    binding.chipGroupServicios.addView(chip)
+                }
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Error al cargar servicios", Toast.LENGTH_SHORT).show()
             }
     }
 
-
     private fun cargarHorasDisponibles(fechaTimestamp: Long) {
         db.collection("barberia").document(barberiaId)
             .get()
             .addOnSuccessListener { doc ->
-                val horarios = doc.get("horarios") as? List<Map<String, Any>> ?: return@addOnSuccessListener
+                val horarios = doc.get("horarios") as? List<Map<String, Any>>
+                    ?: return@addOnSuccessListener
 
-                // Obtener día de la semana seleccionado
                 val cal = Calendar.getInstance().apply { timeInMillis = fechaTimestamp }
-                val diasSemana = listOf("Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado")
+                val diasSemana = listOf(
+                    "Domingo", "Lunes", "Martes", "Miércoles",
+                    "Jueves", "Viernes", "Sábado"
+                )
                 val diaSeleccionado = diasSemana[cal.get(Calendar.DAY_OF_WEEK) - 1]
-
-                // Buscar horario del día
                 val horarioDia = horarios.firstOrNull { it["dia"] == diaSeleccionado }
 
                 if (horarioDia == null || horarioDia["abierto"] == false) {
@@ -128,10 +122,7 @@ class ReservarCitaActivity : AppCompatActivity() {
 
                 val apertura = horarioDia["horaApertura"] as? String ?: "09:00"
                 val cierre = horarioDia["horaCierre"] as? String ?: "20:00"
-
-                // Generar slots de 30 min entre apertura y cierre
-                val horas = generarSlots(apertura, cierre, fechaTimestamp)
-                horasAdapter.actualizarHoras(horas)
+                horasAdapter.actualizarHoras(generarSlots(apertura, cierre, fechaTimestamp))
             }
     }
 
@@ -155,36 +146,28 @@ class ReservarCitaActivity : AppCompatActivity() {
         }
 
         while (calApertura.before(calCierre)) {
-            val horaStr = String.format("%02d:%02d",
+            val horaStr = String.format(
+                "%02d:%02d",
                 calApertura.get(Calendar.HOUR_OF_DAY),
-                calApertura.get(Calendar.MINUTE))
-
-            // Marcar como no disponible si ya pasó
-            val disponible = calApertura.timeInMillis > ahora
-            slots.add(HoraItem(horaStr, disponible))
+                calApertura.get(Calendar.MINUTE)
+            )
+            slots.add(HoraItem(horaStr, calApertura.timeInMillis > ahora))
             calApertura.add(Calendar.MINUTE, 30)
         }
-
         return slots
     }
-
 
     private fun initListeners() {
         binding.btnBack.setOnClickListener { finish() }
 
         binding.calendarView.setOnDateChangeListener { _, year, month, day ->
-            val cal = Calendar.getInstance().apply {
-                set(year, month, day, 0, 0, 0)
-            }
+            val cal = Calendar.getInstance().apply { set(year, month, day, 0, 0, 0) }
             fechaSeleccionada = cal.timeInMillis
             cargarHorasDisponibles(fechaSeleccionada)
         }
 
-        binding.btnConfirmarReserva.setOnClickListener {
-            confirmarReserva()
-        }
+        binding.btnConfirmarReserva.setOnClickListener { confirmarReserva() }
     }
-
 
     private fun confirmarReserva() {
         val uid = auth.currentUser?.uid ?: return
@@ -205,7 +188,6 @@ class ReservarCitaActivity : AppCompatActivity() {
         binding.btnConfirmarReserva.isEnabled = false
         binding.btnConfirmarReserva.text = "Reservando..."
 
-        // Obtener nombre del cliente
         db.collection("users").document(uid).get()
             .addOnSuccessListener { userDoc ->
                 val nombreCliente = userDoc.getString("nombre") ?: "Cliente"
@@ -218,6 +200,7 @@ class ReservarCitaActivity : AppCompatActivity() {
                     "fotoBarberia" to fotoBarberia,
                     "ubicacion" to ubicacionBarberia,
                     "servicio" to servicioSeleccionado,
+                    "precio" to precioSeleccionado,
                     "fecha" to fechaFormato,
                     "hora" to horaSeleccionada,
                     "fechaTimestamp" to fechaSeleccionada,
@@ -229,14 +212,12 @@ class ReservarCitaActivity : AppCompatActivity() {
                 db.collection("citas")
                     .add(cita)
                     .addOnSuccessListener { docRef ->
-                        // Notificar al barbero
                         NotificacionHelper.nuevaCitaSolicitada(
                             uidBarbero = barberiaId,
                             nombreCliente = nombreCliente,
                             fecha = "$fechaFormato $horaSeleccionada",
                             citaId = docRef.id
                         )
-
                         Toast.makeText(
                             this,
                             "¡Cita solicitada! El barbero la confirmará pronto.",

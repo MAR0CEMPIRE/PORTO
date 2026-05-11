@@ -16,6 +16,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.mar0empire.barbershop.R
 import com.mar0empire.barbershop.databinding.FragmentBarberiaDatosBasicosBinding
 import com.mar0empire.barbershop.utils.CloudinaryHelper
@@ -27,6 +29,9 @@ class DatosBasicosFragment : Fragment() {
     private var _binding: FragmentBarberiaDatosBasicosBinding? = null
     private val binding get() = _binding!!
     private val viewModel: SetUpBarberiaViewModel by activityViewModels()
+
+    private val auth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance()
 
     private val pedirPermiso = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -41,7 +46,10 @@ class DatosBasicosFragment : Fragment() {
         uri?.let { subirFoto(it) }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentBarberiaDatosBasicosBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -49,24 +57,53 @@ class DatosBasicosFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Restaurar datos si ya los tenía
+        //  Si hay ViewModel con datos -> restaurar
         if (viewModel.nombre.isNotEmpty()) {
-            binding.etNombre.setText(viewModel.nombre)
-            binding.etDescripcion.setText(viewModel.descripcion)
-            binding.etTelefono.setText(viewModel.telefono)
-        }
-        if (viewModel.fotoUrl.isNotEmpty()) {
-            Glide.with(this).load(viewModel.fotoUrl).circleCrop().into(binding.imgBarberia)
+            rellenarCampos()
+        } else {
+            //  Si es edición (hay sesión activa y no es registro nuevo) → cargar de Firestore
+            val uid = auth.currentUser?.uid
+            if (uid != null && viewModel.emailRegistro.isEmpty()) {
+                cargarDatosDeFirestore(uid)
+            }
         }
 
         initListeners()
     }
 
+    private fun cargarDatosDeFirestore(uid: String) {
+        db.collection("barberia").document(uid)
+            .get()
+            .addOnSuccessListener { doc ->
+                if (doc.exists()) {
+                    viewModel.nombre = doc.getString("nombre") ?: ""
+                    viewModel.descripcion = doc.getString("descripcion") ?: ""
+                    viewModel.telefono = doc.getString("telefono") ?: ""
+                    viewModel.fotoUrl = doc.getString("fotoPerfil") ?: ""
+                    viewModel.direccion = doc.getString("direccion") ?: ""
+                    viewModel.latitud = doc.getDouble("latitud") ?: 0.0
+                    viewModel.longitud = doc.getDouble("longitud") ?: 0.0
+                    rellenarCampos()
+                }
+            }
+    }
+
+    private fun rellenarCampos() {
+        binding.etNombre.setText(viewModel.nombre)
+        binding.etDescripcion.setText(viewModel.descripcion)
+        binding.etTelefono.setText(viewModel.telefono)
+        if (viewModel.fotoUrl.isNotEmpty()) {
+            Glide.with(this).load(viewModel.fotoUrl).circleCrop().into(binding.imgBarberia)
+        }
+    }
+
     private fun initListeners() {
         binding.btnCambiarFoto.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_MEDIA_IMAGES)
-                    == PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(
+                        requireContext(), Manifest.permission.READ_MEDIA_IMAGES
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
                     seleccionarImagen.launch("image/*")
                 } else {
                     pedirPermiso.launch(Manifest.permission.READ_MEDIA_IMAGES)
@@ -90,7 +127,6 @@ class DatosBasicosFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            // Guardar en ViewModel
             viewModel.nombre = nombre
             viewModel.descripcion = descripcion
             viewModel.telefono = telefono

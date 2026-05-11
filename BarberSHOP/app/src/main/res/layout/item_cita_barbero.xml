@@ -78,7 +78,7 @@
 
         </LinearLayout>
 
-        <!-- Botones confirmar/cancelar — solo si está pendiente -->
+        <!-- Botones Confirmar / Cancelar — solo si PENDIENTE -->
         <LinearLayout
             android:id="@+id/cita_barbero_botones"
             android:layout_width="match_parent"
@@ -110,6 +110,34 @@
                 app:cornerRadius="8dp"/>
 
         </LinearLayout>
+
+        <!-- Botón COMPLETADA — solo si CONFIRMADA -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_completar_cita"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="✓ Marcar como completada"
+            android:textSize="13sp"
+            android:visibility="gone"
+            app:backgroundTint="@color/accent_green"
+            app:cornerRadius="8dp"
+            app:icon="@android:drawable/checkbox_on_background"
+            app:iconGravity="textStart"
+            app:iconSize="16dp"/>
+
+        <!-- Botón ELIMINAR — solo si CANCELADA -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_eliminar_cita"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Eliminar cita"
+            android:textSize="13sp"
+            android:visibility="gone"
+            app:backgroundTint="@color/gray_600"
+            app:cornerRadius="8dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
     </LinearLayout>
 

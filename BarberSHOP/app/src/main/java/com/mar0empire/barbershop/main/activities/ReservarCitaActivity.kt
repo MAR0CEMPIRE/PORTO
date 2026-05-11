@@ -28,7 +28,7 @@ class ReservarCitaActivity : AppCompatActivity() {
     private lateinit var ubicacionBarberia: String
 
     private var servicioSeleccionado: String = ""
-    private var precioSeleccionado: Double = 0.0 
+    private var precioSeleccionado: Double = 0.0
     private var fechaSeleccionada: Long = System.currentTimeMillis()
     private var horaSeleccionada: String = ""
     private lateinit var horasAdapter: HorasAdapter

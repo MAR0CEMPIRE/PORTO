@@ -83,12 +83,12 @@ class HomeClienteFragment : Fragment() {
             val query = texto.toString().trim().lowercase()
 
             if (query.isEmpty()) {
-                // Sin texto → mostrar todas
+                // Sin texto -> mostrar todas
                 adapterCercanas.submitList(todasCercanas)
                 adapterDestacadas.submitList(todasDestacadas)
                 adapterTop.submitList(todasTop)
             } else {
-                // Con texto → filtrar por nombre o dirección
+                // Con texto -> filtrar por nombre o dirección
                 val filtroCercanas = todasCercanas.filter {
                     it.nombre.lowercase().contains(query) ||
                             it.direccion.lowercase().contains(query)

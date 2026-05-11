@@ -19,9 +19,8 @@ class CompletarBarberiaActivity : AppCompatActivity() {
         const val PASO_HORARIOS = "horarios"
         const val PASO_SERVICIOS = "servicios"
 
-        //  Extras del registro nuevo
-        const val EXTRA_NOMBRE = "nombre"
-        const val EXTRA_EMAIL = "email"
+        const val EXTRA_NOMBRE   = "nombre"
+        const val EXTRA_EMAIL    = "email"
         const val EXTRA_PASSWORD = "password"
     }
 
@@ -32,13 +31,24 @@ class CompletarBarberiaActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this)[SetUpBarberiaViewModel::class.java]
 
-        //  Guardar datos del registro en el ViewModel si vienen del RegisterActivity
-        intent.getStringExtra(EXTRA_NOMBRE)?.let { viewModel.nombreUsuario = it }
-        intent.getStringExtra(EXTRA_EMAIL)?.let { viewModel.emailRegistro = it }
+        // Guardar datos del registro nuevo en el ViewModel
+        intent.getStringExtra(EXTRA_NOMBRE)?.let   { viewModel.nombreUsuario    = it }
+        intent.getStringExtra(EXTRA_EMAIL)?.let    { viewModel.emailRegistro    = it }
         intent.getStringExtra(EXTRA_PASSWORD)?.let { viewModel.passwordRegistro = it }
 
         setupToolbar()
-        navegarAlPaso()
+
+        val paso = intent.getStringExtra(EXTRA_PASO)
+
+        // Si es modo edición (no registro nuevo) y hay un paso destino, precargar Firestore antes de navegar
+        if (paso != null && viewModel.emailRegistro.isEmpty()) {
+            viewModel.cargarDatosFirestoreCompletos {
+                navegarAlPaso(paso)
+            }
+        } else {
+            // Registro nuevo -> navegar directamente (sin carga previa)
+            if (paso != null) navegarAlPaso(paso)
+        }
     }
 
     private fun setupToolbar() {
@@ -54,9 +64,7 @@ class CompletarBarberiaActivity : AppCompatActivity() {
             }
     }
 
-    private fun navegarAlPaso() {
-        val paso = intent.getStringExtra(EXTRA_PASO) ?: return
-
+    private fun navegarAlPaso(paso: String) {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_setup_barberia) as NavHostFragment
 

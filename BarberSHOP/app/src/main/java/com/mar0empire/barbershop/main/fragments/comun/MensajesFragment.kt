@@ -174,7 +174,7 @@ class MensajesFragment : Fragment() {
                                 callback(doc.getString("nombre") ?: "Usuario", "")
                             }
                     } else {
-                        // Es cliente → usar nombre del usuario
+                        // Es cliente -> usar nombre del usuario
                         callback(
                             doc.getString("nombre") ?: "Usuario",
                             doc.getString("fotoPerfil") ?: ""

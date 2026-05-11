@@ -1,5 +1,6 @@
 package com.mar0empire.barbershop.main.fragments.barberia
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,7 @@ import com.mar0empire.barbershop.R
 import com.mar0empire.barbershop.adapters.ProximasCitasAdapter
 import com.mar0empire.barbershop.databinding.FragmentDashboardBinding
 import com.mar0empire.barbershop.models.CitaBarbero
+import com.mar0empire.barbershop.utils.NotificacionHelper
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -24,7 +26,7 @@ class DashboardFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
+    private val db   = FirebaseFirestore.getInstance()
 
     private lateinit var adapterCitas: ProximasCitasAdapter
 
@@ -41,7 +43,9 @@ class DashboardFragment : Fragment() {
 
         adapterCitas = ProximasCitasAdapter(
             onConfirmar = { cita -> cambiarEstadoCita(cita.id, "confirmada") },
-            onCancelar = { cita -> cambiarEstadoCita(cita.id, "cancelada") }
+            onCancelar  = { cita -> cambiarEstadoCita(cita.id, "cancelada") },
+            onCompletar = { cita -> cambiarEstadoCita(cita.id, "completada") },
+            onEliminar  = { cita -> confirmarEliminarCita(cita) }
         )
 
         binding.recyclerCitas.layoutManager = LinearLayoutManager(requireContext())
@@ -95,21 +99,23 @@ class DashboardFragment : Fragment() {
 
                 val lista = docs.documents.map { doc ->
                     CitaBarbero(
-                        id = doc.id,
-                        cliente = doc.getString("nombreCliente") ?: "",
-                        hora = doc.getString("hora") ?: "",
-                        servicio = doc.getString("servicio") ?: "",
-                        precio = doc.getDouble("precio") ?: 0.0,
-                        estado = doc.getString("estado") ?: "pendiente"
+                        id       = doc.id,
+                        cliente  = doc.getString("nombreCliente") ?: "",
+                        hora     = doc.getString("hora")          ?: "",
+                        servicio = doc.getString("servicio")      ?: "",
+                        precio   = doc.getDouble("precio")        ?: 0.0,
+                        estado   = doc.getString("estado")        ?: "pendiente"
                     )
                 }.sortedBy { it.hora }
 
                 adapterCitas.submitList(lista)
                 binding.txtCitasHoy.text = lista.size.toString()
+
+                // Ingresos = citas CONFIRMADAS + citas COMPLETADAS del día
                 val ingresos = lista
-                    .filter { it.estado == "confirmada" }
+                    .filter { it.estado == "confirmada" || it.estado == "completada" }
                     .sumOf { it.precio }
-                binding.txtIngresosHoy.text = "${ingresos}€"
+                binding.txtIngresosHoy.text = String.format("%.2f€", ingresos)
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Error al cargar citas", Toast.LENGTH_SHORT).show()
@@ -117,46 +123,67 @@ class DashboardFragment : Fragment() {
     }
 
     private fun cambiarEstadoCita(citaId: String, nuevoEstado: String) {
-        val uid = auth.currentUser?.uid ?: return
-
         db.collection("citas").document(citaId)
             .update("estado", nuevoEstado)
             .addOnSuccessListener {
-                val mensaje = if (nuevoEstado == "confirmada") "Cita confirmada ✓"
-                else "Cita cancelada"
+                val mensaje = when (nuevoEstado) {
+                    "confirmada" -> "Cita confirmada ✓"
+                    "completada" -> "Cita completada ✓"
+                    else         -> "Cita cancelada"
+                }
                 Toast.makeText(requireContext(), mensaje, Toast.LENGTH_SHORT).show()
 
-                // Notificar al cliente
-                db.collection("citas").document(citaId).get()
-                    .addOnSuccessListener { doc ->
-                        val clienteId = doc.getString("clienteId") ?: return@addOnSuccessListener
-                        val nombreBarberia = doc.getString("nombreBarberia") ?: ""
-                        val fecha = doc.getString("fecha") ?: ""
-                        val hora = doc.getString("hora") ?: ""
+                // Notificar al cliente si aplica
+                if (nuevoEstado == "confirmada" || nuevoEstado == "cancelada") {
+                    db.collection("citas").document(citaId).get()
+                        .addOnSuccessListener { doc ->
+                            val clienteId      = doc.getString("clienteId")      ?: return@addOnSuccessListener
+                            val nombreBarberia = doc.getString("nombreBarberia") ?: ""
+                            val fecha          = doc.getString("fecha")          ?: ""
+                            val hora           = doc.getString("hora")           ?: ""
 
-                        if (nuevoEstado == "confirmada") {
-                            com.mar0empire.barbershop.utils.NotificacionHelper.citaConfirmada(
-                                uidCliente = clienteId,
-                                nombreBarberia = nombreBarberia,
-                                fecha = "$fecha $hora",
-                                citaId = citaId
-                            )
-                        } else {
-                            com.mar0empire.barbershop.utils.NotificacionHelper.citaCancelada(
-                                uid = clienteId,
-                                nombre = nombreBarberia,
-                                fecha = "$fecha $hora",
-                                citaId = citaId
-                            )
+                            if (nuevoEstado == "confirmada") {
+                                NotificacionHelper.citaConfirmada(
+                                    uidCliente     = clienteId,
+                                    nombreBarberia = nombreBarberia,
+                                    fecha          = "$fecha $hora",
+                                    citaId         = citaId
+                                )
+                            } else {
+                                NotificacionHelper.citaCancelada(
+                                    uid    = clienteId,
+                                    nombre = nombreBarberia,
+                                    fecha  = "$fecha $hora",
+                                    citaId = citaId
+                                )
+                            }
                         }
-                    }
+                }
 
-                // Recargar lista
                 cargarCitasHoy()
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Error al actualizar la cita", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun confirmarEliminarCita(cita: CitaBarbero) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Eliminar cita")
+            .setMessage("¿Seguro que quieres eliminar la cita de ${cita.cliente}? Esta acción no se puede deshacer.")
+            .setPositiveButton("Eliminar") { _, _ ->
+                db.collection("citas").document(cita.id)
+                    .delete()
+                    .addOnSuccessListener {
+                        Toast.makeText(requireContext(), "Cita eliminada", Toast.LENGTH_SHORT).show()
+                        cargarCitasHoy()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(requireContext(), "Error al eliminar", Toast.LENGTH_SHORT).show()
+                    }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 
     override fun onDestroyView() {

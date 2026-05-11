@@ -42,9 +42,7 @@ class DatosBasicosFragment : Fragment() {
 
     private val seleccionarImagen = registerForActivityResult(
         ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri?.let { subirFoto(it) }
-    }
+    ) { uri -> uri?.let { subirFoto(it) } }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,15 +55,14 @@ class DatosBasicosFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //  Si hay ViewModel con datos -> restaurar
-        if (viewModel.nombre.isNotEmpty()) {
+        //  Si viene del registro nuevo (hay email en VM) -> no cargar de Firestore
+        //  Si es edición (hay sesión activa) -> cargar siempre de Firestore
+        val uid = auth.currentUser?.uid
+        if (uid != null && viewModel.emailRegistro.isEmpty()) {
+            cargarDatosDeFirestore(uid)
+        } else if (viewModel.nombre.isNotEmpty()) {
+            // Restaurar del ViewModel si ya navegó hacia atrás
             rellenarCampos()
-        } else {
-            //  Si es edición (hay sesión activa y no es registro nuevo) → cargar de Firestore
-            val uid = auth.currentUser?.uid
-            if (uid != null && viewModel.emailRegistro.isEmpty()) {
-                cargarDatosDeFirestore(uid)
-            }
         }
 
         initListeners()
@@ -83,6 +80,36 @@ class DatosBasicosFragment : Fragment() {
                     viewModel.direccion = doc.getString("direccion") ?: ""
                     viewModel.latitud = doc.getDouble("latitud") ?: 0.0
                     viewModel.longitud = doc.getDouble("longitud") ?: 0.0
+
+                    // Cargar horarios
+                    val horariosRaw = doc.get("horarios") as? List<Map<String, Any>>
+                    if (!horariosRaw.isNullOrEmpty()) {
+                        viewModel.horarios = horariosRaw.map { h ->
+                            com.mar0empire.barbershop.models.HorarioDia(
+                                dia = h["dia"] as? String ?: "",
+                                abierto = h["abierto"] as? Boolean ?: false,
+                                horaApertura = h["horaApertura"] as? String ?: "09:00",
+                                horaCierre = h["horaCierre"] as? String ?: "20:00"
+                            )
+                        }
+                    }
+
+                    // Cargar servicios
+                    val serviciosRaw = doc.get("servicios") as? List<Map<String, Any>>
+                    if (!serviciosRaw.isNullOrEmpty()) {
+                        viewModel.servicios.clear()
+                        serviciosRaw.forEach { s ->
+                            viewModel.servicios.add(
+                                com.mar0empire.barbershop.models.Servicio(
+                                    id = s["id"] as? String ?: "",
+                                    nombre = s["nombre"] as? String ?: "",
+                                    precio = s["precio"] as? Double ?: 0.0,
+                                    duracionMinutos = (s["duracionMinutos"] as? Long)?.toInt() ?: 30
+                                )
+                            )
+                        }
+                    }
+
                     rellenarCampos()
                 }
             }
@@ -103,11 +130,8 @@ class DatosBasicosFragment : Fragment() {
                 if (ContextCompat.checkSelfPermission(
                         requireContext(), Manifest.permission.READ_MEDIA_IMAGES
                     ) == PackageManager.PERMISSION_GRANTED
-                ) {
-                    seleccionarImagen.launch("image/*")
-                } else {
-                    pedirPermiso.launch(Manifest.permission.READ_MEDIA_IMAGES)
-                }
+                ) seleccionarImagen.launch("image/*")
+                else pedirPermiso.launch(Manifest.permission.READ_MEDIA_IMAGES)
             } else {
                 seleccionarImagen.launch("image/*")
             }

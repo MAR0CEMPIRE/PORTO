@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="20dp">
@@ -29,7 +28,6 @@
         android:textColor="?attr/colorSecondary"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView3" />
 
@@ -64,6 +62,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/et_email">
+
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/txtPassword"
             android:layout_width="match_parent"
@@ -71,7 +70,7 @@
             android:inputType="textPassword"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Forgot -->
+    <!-- Olvidé mi contraseña -->
     <TextView
         android:id="@+id/tv_recover"
         android:layout_width="wrap_content"
@@ -85,7 +84,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/et_password" />
 
-    <!-- Iniciar Sesión -->
+    <!-- Botón Iniciar Sesión -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_login"
         android:layout_width="0dp"
@@ -99,36 +98,36 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_recover"/>
 
-    <!-- Google -->
 
+
+    <!-- Botón Google -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/login_google"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Google"
-        android:textSize="16sp"
         android:padding="14dp"
+        android:text="Continuar con Google"
+        android:textSize="15sp"
         app:cornerRadius="12dp"
-        android:drawableTint="@null"
-        android:layout_marginTop="10dp"
+        app:iconGravity="textStart"
+        app:iconSize="20dp"
+        app:iconTint="@null"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_login" />
 
     <!-- Registrarse -->
-
     <TextView
         android:id="@+id/tvregistrarse"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textSize="15sp"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:fontFamily="@font/montserrat_bold"
         android:textAlignment="center"
         android:clickable="true"
-        android:text="¿No tienes cuenta? Registrate"
-        android:layout_marginTop="10dp"
+        android:text="¿No tienes cuenta? Regístrate"
+        android:layout_marginTop="14dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/login_google"/>

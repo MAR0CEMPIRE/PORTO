@@ -4,4 +4,6 @@
     <string name="hora_disponible">Disponible</string>
     <string name="citas_empty">No tienes citas</string>
 
+    <!-- Reemplaza esto con tu ID de cliente web de la consola de Firebase -->
+    <string name="default_web_client_id">209134444258-hs7eejr1jp5er8n0bbb74kds28bfnron.apps.googleusercontent.com</string>
 </resources>

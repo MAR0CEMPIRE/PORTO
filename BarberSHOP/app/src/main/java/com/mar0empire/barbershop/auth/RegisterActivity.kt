@@ -40,6 +40,8 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
+
+
     private fun initListeners() {
         binding.volver.setOnClickListener { finish() }
         binding.btnRegistrar.setOnClickListener { validarYContinuar() }

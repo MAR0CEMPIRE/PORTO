@@ -94,7 +94,7 @@ class EditarPerfilActivity : AppCompatActivity() {
             binding.btnGuardar.isEnabled = false
             binding.btnGuardar.text = "Guardando..."
 
-            // Si hay imagen nueva → subirla primero
+            // Si hay imagen nueva -> subirla primero
             val uri = uriImagenSeleccionada
             if (uri != null) {
                 lifecycleScope.launch {
@@ -115,7 +115,7 @@ class EditarPerfilActivity : AppCompatActivity() {
                         }
                 }
             } else {
-                // Sin imagen nueva → solo guardar nombre
+                // Sin imagen nueva -> solo guardar nombre
                 guardarEnFirestore(nuevoNombre, fotoUrlActual)
             }
         }

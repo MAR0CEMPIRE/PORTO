@@ -1,10 +1,11 @@
-package com.mar0empire.barbershop.main.fragments.cliente
+package com.mar0empire.barbershop.main.fragments.comun
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -43,6 +44,7 @@ class CitasFragment : Fragment() {
 
         configurarTabs()
         observarDatos()
+        observarErrores()
         seleccionarTabProximas()
     }
 
@@ -84,6 +86,14 @@ class CitasFragment : Fragment() {
             if (tabHistorial.background.constantState ==
                 resources.getDrawable(R.drawable.bg_section_selected, null).constantState
             ) adapter.submitList(lista)
+        }
+    }
+
+    private fun observarErrores() {
+        viewModel.error.observe(viewLifecycleOwner) { mensaje ->
+            if (!mensaje.isNullOrEmpty()) {
+                Toast.makeText(requireContext(), mensaje, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

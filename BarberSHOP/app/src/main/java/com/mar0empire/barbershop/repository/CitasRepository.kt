@@ -13,9 +13,14 @@ class CitasRepository {
         onSuccess: (List<Cita>) -> Unit,
         onError: (Exception) -> Unit
     ) {
-        val uid = auth.currentUser?.uid ?: return
-        val ahora = System.currentTimeMillis()
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
+            Log.w("CitasRepository", "getCitasFuturas: usuario no autenticado aún")
+            onError(Exception("Usuario no autenticado"))
+            return
+        }
 
+        val ahora = System.currentTimeMillis()
         Log.d("CITAS_DEBUG", "Buscando citas futuras para UID: $uid")
 
         db.collection("citas")
@@ -56,7 +61,13 @@ class CitasRepository {
         onSuccess: (List<Cita>) -> Unit,
         onError: (Exception) -> Unit
     ) {
-        val uid = auth.currentUser?.uid ?: return
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
+            Log.w("CitasRepository", "getCitasPasadas: usuario no autenticado aún")
+            onError(Exception("Usuario no autenticado"))
+            return
+        }
+
         val ahora = System.currentTimeMillis()
 
         db.collection("citas")
@@ -84,6 +95,9 @@ class CitasRepository {
                 Log.d("CITAS_DEBUG", "Citas pasadas: ${citas.size}")
                 onSuccess(citas)
             }
-            .addOnFailureListener { e -> onError(e) }
+            .addOnFailureListener { e ->
+                Log.e("CITAS_DEBUG", "Error: ${e.message}")
+                onError(e)
+            }
     }
 }

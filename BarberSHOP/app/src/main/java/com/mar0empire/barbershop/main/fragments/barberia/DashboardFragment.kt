@@ -15,31 +15,34 @@ import com.mar0empire.barbershop.adapters.ProximasCitasAdapter
 import com.mar0empire.barbershop.databinding.FragmentDashboardBinding
 import com.mar0empire.barbershop.models.CitaBarbero
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class DashboardFragment : Fragment() {
 
-    // 1. Corregido el tipo de binding
     private var _binding: FragmentDashboardBinding? = null
     private val binding get() = _binding!!
 
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
 
-    private val adapterCitas = ProximasCitasAdapter()
+    private lateinit var adapterCitas: ProximasCitasAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // 2. Corregido el inflado del binding
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // 3. Añadida la llamada a super
         super.onViewCreated(view, savedInstanceState)
+
+        adapterCitas = ProximasCitasAdapter(
+            onConfirmar = { cita -> cambiarEstadoCita(cita.id, "confirmada") },
+            onCancelar = { cita -> cambiarEstadoCita(cita.id, "cancelada") }
+        )
 
         binding.recyclerCitas.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerCitas.adapter = adapterCitas
@@ -56,19 +59,15 @@ class DashboardFragment : Fragment() {
             .get()
             .addOnSuccessListener { doc ->
                 if (!doc.exists()) return@addOnSuccessListener
-
                 binding.txtNombreBarberia.text = doc.getString("nombre") ?: ""
 
-                val img = doc.getString("imagenPrincipal")
+                val img = doc.getString("fotoPerfil")
                 if (!img.isNullOrEmpty()) {
                     Glide.with(this)
                         .load(img)
                         .placeholder(R.drawable.avatar_perfil)
                         .into(binding.imgBarberia)
                 }
-            }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), "Error al cargar barbería", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -85,7 +84,6 @@ class DashboardFragment : Fragment() {
 
     private fun cargarCitasHoy() {
         val uid = auth.currentUser?.uid ?: return
-
         val hoy = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
 
         db.collection("citas")
@@ -93,25 +91,71 @@ class DashboardFragment : Fragment() {
             .whereEqualTo("fecha", hoy)
             .get()
             .addOnSuccessListener { docs ->
+                if (_binding == null) return@addOnSuccessListener
 
                 val lista = docs.documents.map { doc ->
                     CitaBarbero(
+                        id = doc.id,
                         cliente = doc.getString("nombreCliente") ?: "",
                         hora = doc.getString("hora") ?: "",
                         servicio = doc.getString("servicio") ?: "",
-                        precio = doc.getDouble("precio") ?: 0.0
+                        precio = doc.getDouble("precio") ?: 0.0,
+                        estado = doc.getString("estado") ?: "pendiente"
                     )
-                }
+                }.sortedBy { it.hora }
 
                 adapterCitas.submitList(lista)
-
                 binding.txtCitasHoy.text = lista.size.toString()
-
-                val ingresos = lista.sumOf { it.precio }
+                val ingresos = lista
+                    .filter { it.estado == "confirmada" }
+                    .sumOf { it.precio }
                 binding.txtIngresosHoy.text = "${ingresos}€"
             }
             .addOnFailureListener {
                 Toast.makeText(requireContext(), "Error al cargar citas", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun cambiarEstadoCita(citaId: String, nuevoEstado: String) {
+        val uid = auth.currentUser?.uid ?: return
+
+        db.collection("citas").document(citaId)
+            .update("estado", nuevoEstado)
+            .addOnSuccessListener {
+                val mensaje = if (nuevoEstado == "confirmada") "Cita confirmada ✓"
+                else "Cita cancelada"
+                Toast.makeText(requireContext(), mensaje, Toast.LENGTH_SHORT).show()
+
+                // Notificar al cliente
+                db.collection("citas").document(citaId).get()
+                    .addOnSuccessListener { doc ->
+                        val clienteId = doc.getString("clienteId") ?: return@addOnSuccessListener
+                        val nombreBarberia = doc.getString("nombreBarberia") ?: ""
+                        val fecha = doc.getString("fecha") ?: ""
+                        val hora = doc.getString("hora") ?: ""
+
+                        if (nuevoEstado == "confirmada") {
+                            com.mar0empire.barbershop.utils.NotificacionHelper.citaConfirmada(
+                                uidCliente = clienteId,
+                                nombreBarberia = nombreBarberia,
+                                fecha = "$fecha $hora",
+                                citaId = citaId
+                            )
+                        } else {
+                            com.mar0empire.barbershop.utils.NotificacionHelper.citaCancelada(
+                                uid = clienteId,
+                                nombre = nombreBarberia,
+                                fecha = "$fecha $hora",
+                                citaId = citaId
+                            )
+                        }
+                    }
+
+                // Recargar lista
+                cargarCitasHoy()
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Error al actualizar la cita", Toast.LENGTH_SHORT).show()
             }
     }
 

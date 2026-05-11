@@ -8,7 +8,7 @@ import com.mar0empire.barbershop.models.Barberia
 class BarberiaRepository {
 
     private val db = FirebaseFirestore.getInstance()
-    
+
     fun getBarberiasCercanas(
         latitudUsuario: Double,
         longitudUsuario: Double,
@@ -23,10 +23,9 @@ class BarberiaRepository {
                     val lon = doc.getDouble("longitud") ?: return@mapNotNull null
                     val nombre = doc.getString("nombre") ?: return@mapNotNull null
 
-                    // Calcular distancia en km
-                    val distancia = calcularDistancia(
-                        latitudUsuario, longitudUsuario, lat, lon
-                    )
+                    val distancia = calcularDistancia(latitudUsuario, longitudUsuario, lat, lon)
+                    val serviciosRaw = doc.get("servicios") as? List<Map<String, Any>> ?: emptyList()
+                    val nombresServicios = serviciosRaw.mapNotNull { it["nombre"] as? String }
 
                     Barberia(
                         id = doc.id,
@@ -35,17 +34,17 @@ class BarberiaRepository {
                         ubicacion = doc.getString("direccion") ?: "",
                         fotoPerfil = doc.getString("fotoPerfil") ?: "",
                         fotoUrl = doc.getString("fotoPerfil") ?: "",
+                        rating = doc.getDouble("rating") ?: 0.0,
                         latitud = lat,
                         longitud = lon,
-                        distancia = distancia
+                        distancia = distancia,
+                        servicios = nombresServicios
                     )
                 }
-                // Ordenar por distancia y devolver las 10 más cercanas
                 onSuccess(barberias.sortedBy { it.distancia }.take(10))
             }
             .addOnFailureListener { onError(it) }
     }
-
 
     fun getBarberiasDestacadas(
         onSuccess: (List<Barberia>) -> Unit,
@@ -55,6 +54,9 @@ class BarberiaRepository {
             .get()
             .addOnSuccessListener { result ->
                 val barberias = result.documents.mapNotNull { doc ->
+                    val serviciosRaw = doc.get("servicios") as? List<Map<String, Any>> ?: emptyList()
+                    val nombresServicios = serviciosRaw.mapNotNull { it["nombre"] as? String }
+
                     Barberia(
                         id = doc.id,
                         nombre = doc.getString("nombre") ?: return@mapNotNull null,
@@ -64,14 +66,14 @@ class BarberiaRepository {
                         fotoUrl = doc.getString("fotoPerfil") ?: "",
                         rating = doc.getDouble("rating") ?: 0.0,
                         latitud = doc.getDouble("latitud") ?: 0.0,
-                        longitud = doc.getDouble("longitud") ?: 0.0
+                        longitud = doc.getDouble("longitud") ?: 0.0,
+                        servicios = nombresServicios
                     )
                 }
                 onSuccess(barberias)
             }
             .addOnFailureListener { onError(it) }
     }
-
 
     fun getBarberiasTop(
         onSuccess: (List<Barberia>) -> Unit,
@@ -83,6 +85,9 @@ class BarberiaRepository {
             .get()
             .addOnSuccessListener { result ->
                 val barberias = result.documents.mapNotNull { doc ->
+                    val serviciosRaw = doc.get("servicios") as? List<Map<String, Any>> ?: emptyList()
+                    val nombresServicios = serviciosRaw.mapNotNull { it["nombre"] as? String }
+
                     Barberia(
                         id = doc.id,
                         nombre = doc.getString("nombre") ?: return@mapNotNull null,
@@ -92,7 +97,8 @@ class BarberiaRepository {
                         fotoUrl = doc.getString("fotoPerfil") ?: "",
                         rating = doc.getDouble("rating") ?: 0.0,
                         latitud = doc.getDouble("latitud") ?: 0.0,
-                        longitud = doc.getDouble("longitud") ?: 0.0
+                        longitud = doc.getDouble("longitud") ?: 0.0,
+                        servicios = nombresServicios
                     )
                 }
                 onSuccess(barberias)
@@ -100,13 +106,12 @@ class BarberiaRepository {
             .addOnFailureListener { onError(it) }
     }
 
-
     private fun calcularDistancia(
         lat1: Double, lon1: Double,
         lat2: Double, lon2: Double
     ): Double {
         val resultado = FloatArray(1)
         Location.distanceBetween(lat1, lon1, lat2, lon2, resultado)
-        return (resultado[0] / 1000.0) // convertir a km
+        return (resultado[0] / 1000.0)
     }
 }

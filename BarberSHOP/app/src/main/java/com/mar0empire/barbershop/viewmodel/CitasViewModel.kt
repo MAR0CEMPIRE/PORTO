@@ -8,28 +8,26 @@ import com.mar0empire.barbershop.models.Cita
 import com.mar0empire.barbershop.repository.CitasRepository
 
 class CitasViewModel : ViewModel() {
-    private val repo = CitasRepository()
-    private val _proximas = MutableLiveData<List<Cita>>()
-    val proximas : LiveData<List<Cita>> get() = _proximas
-    private val _historial = MutableLiveData<List<Cita>>()
-    val historial : LiveData<List<Cita>> get() = _historial
 
-    fun cargarProximas(){
+    private val repo = CitasRepository()
+
+    private val _proximas = MutableLiveData<List<Cita>>()
+    val proximas: LiveData<List<Cita>> get() = _proximas
+
+    private val _historial = MutableLiveData<List<Cita>>()
+    val historial: LiveData<List<Cita>> get() = _historial
+
+    fun cargarProximas() {
         repo.getCitasFuturas(
-            onSuccess = {
-                citas -> _proximas.value = citas
-            }, onError = {
-                Log.e("CitasViewModel", "Error al cargar las citas")
-            }
+            onSuccess = { citas -> _proximas.value = citas },
+            onError = { Log.e("CitasViewModel", "Error al cargar próximas: ${it.message}") }
         )
     }
-    fun cargarHistorial(){
+
+    fun cargarHistorial() {
         repo.getCitasPasadas(
-        onSuccess = {
-                citas -> _proximas.value = citas
-        }, onError = {
-            Log.e("CitasViewModel", "Error al cargar las citas")
-        }
-    )
+            onSuccess = { citas -> _historial.value = citas },
+            onError = { Log.e("CitasViewModel", "Error al cargar historial: ${it.message}") }
+        )
     }
 }

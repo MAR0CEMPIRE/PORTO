@@ -5,7 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground">
+    android:background="?android:attr/colorBackground"
+    android:fitsSystemWindows="true">
 
     <!-- Header -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -14,6 +15,7 @@
         android:layout_height="wrap_content"
         android:paddingHorizontal="12dp"
         android:paddingVertical="12dp"
+        android:layout_marginTop="20dp"
         android:background="?android:attr/colorBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -144,13 +146,13 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Lista de mensajes — ocupa el espacio entre header e input -->
+    <!-- Lista de mensajes -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_mensajes"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:paddingHorizontal="12dp"
-        android:paddingVertical="8dp"
+        android:paddingVertical="4dp"
         android:clipToPadding="false"
         app:layout_constraintBottom_toTopOf="@+id/layout_input"
         app:layout_constraintEnd_toEndOf="parent"

@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.mar0empire.barbershop.auth.LoginActivity
 import com.mar0empire.barbershop.databinding.FragmentBarberiaResumenBinding
 import com.mar0empire.barbershop.main.activities.MainBarberiaActivity
 import com.mar0empire.barbershop.viewmodel.SetUpBarberiaViewModel
@@ -24,25 +25,28 @@ class ResumenFragment : Fragment() {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentBarberiaResumenBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         mostrarResumen()
         initListeners()
     }
 
     private fun mostrarResumen() {
         val container = binding.containerResumen
-
-        agregarFila(container, "Nombre", viewModel.nombre)
+        agregarFila(container, "Nombre barbería", viewModel.nombre)
         agregarFila(container, "Teléfono", viewModel.telefono)
         agregarFila(container, "Descripción", viewModel.descripcion)
-        agregarFila(container, "Ubicación", viewModel.direccion.ifEmpty { "${viewModel.latitud}, ${viewModel.longitud}" })
+        agregarFila(container, "Ubicación",
+            viewModel.direccion.ifEmpty { "${viewModel.latitud}, ${viewModel.longitud}" })
 
         val diasAbiertos = viewModel.horarios
             .filter { it.abierto }
@@ -65,16 +69,50 @@ class ResumenFragment : Fragment() {
 
     private fun initListeners() {
         binding.btnFinalizar.setOnClickListener {
-            guardarEnFirestore()
+            finalizarRegistro()
         }
     }
 
-    private fun guardarEnFirestore() {
-        val uid = auth.currentUser?.uid ?: return
-
+    private fun finalizarRegistro() {
         binding.btnFinalizar.isEnabled = false
-        binding.btnFinalizar.text = "Guardando..."
+        binding.btnFinalizar.text = "Creando cuenta..."
 
+        // Si viene del registro nuevo → crear cuenta primero
+        if (viewModel.emailRegistro.isNotEmpty()) {
+            crearCuentaYGuardar()
+        } else {
+            // Viene de editar perfil → solo actualizar datos
+            guardarDatosEnFirestore(auth.currentUser?.uid ?: return)
+        }
+    }
+
+
+    private fun crearCuentaYGuardar() {
+        auth.createUserWithEmailAndPassword(
+            viewModel.emailRegistro,
+            viewModel.passwordRegistro
+        ).addOnSuccessListener { result ->
+            val uid = result.user?.uid ?: return@addOnSuccessListener
+
+            // Guardar usuario en colección users
+            db.collection("users").document(uid).set(
+                hashMapOf(
+                    "nombre" to viewModel.nombreUsuario,
+                    "email" to viewModel.emailRegistro,
+                    "rol" to "barberia"
+                )
+            ).addOnSuccessListener {
+                guardarDatosEnFirestore(uid)
+            }.addOnFailureListener {
+                mostrarError("Error al guardar el usuario")
+            }
+        }.addOnFailureListener {
+            mostrarError("Error al crear la cuenta: ${it.message}")
+        }
+    }
+
+
+    private fun guardarDatosEnFirestore(uid: String) {
         val horariosMapa = viewModel.horarios.map { horario ->
             mapOf(
                 "dia" to horario.dia,
@@ -109,18 +147,24 @@ class ResumenFragment : Fragment() {
         db.collection("barberia").document(uid)
             .set(datos)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "¡Barbería configurada! ✓", Toast.LENGTH_SHORT).show()
-                startActivity(
-                    Intent(requireContext(), MainBarberiaActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    }
-                )
-            }
+            // Cerrar sesión para que tenga que hacer login
+            auth.signOut()
+            Toast.makeText(requireContext(), "¡Cuenta creada! Inicia sesión para continuar.", Toast.LENGTH_LONG).show()
+            startActivity(
+                Intent(requireContext(), LoginActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+            )
+        }
             .addOnFailureListener {
-                binding.btnFinalizar.isEnabled = true
-                binding.btnFinalizar.text = "Finalizar"
-                Toast.makeText(requireContext(), "Error al guardar", Toast.LENGTH_SHORT).show()
+                mostrarError("Error al guardar los datos")
             }
+    }
+
+    private fun mostrarError(mensaje: String) {
+        binding.btnFinalizar.isEnabled = true
+        binding.btnFinalizar.text = "Finalizar"
+        Toast.makeText(requireContext(), mensaje, Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {

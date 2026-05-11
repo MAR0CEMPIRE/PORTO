@@ -34,15 +34,16 @@ class ChatActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setSoftInputMode(
+            android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+        )
         binding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Recibir datos del Intent
-        uidDestino = intent.getStringExtra("uid_destino") ?: return
+        uidDestino = intent.getStringExtra("uid_destino") ?: run { finish(); return }
         nombreDestino = intent.getStringExtra("nombre_destino") ?: ""
 
-        // Generar chatId único y consistente
-        val uidActual = auth.currentUser?.uid ?: return
+        val uidActual = auth.currentUser?.uid ?: run { finish(); return }
         chatId = generarChatId(uidActual, uidDestino)
 
         setupUI()
@@ -55,26 +56,32 @@ class ChatActivity : AppCompatActivity() {
     private fun setupUI() {
         binding.txtNombreChat.text = nombreDestino
 
-        // Cargar foto del destino
+        // ✅ Buscar foto en users primero, luego en barberia
         db.collection("users").document(uidDestino).get()
             .addOnSuccessListener { doc ->
-                val foto = doc.getString("fotoPerfil")
+                val foto = if (doc.exists()) doc.getString("fotoPerfil") else null
+
                 if (!foto.isNullOrEmpty()) {
-                    Glide.with(this)
-                        .load(foto)
-                        .circleCrop()
-                        .into(binding.imgAvatarChat)
+                    Glide.with(this).load(foto).circleCrop().into(binding.imgAvatarChat)
+                } else {
+                    db.collection("barberia").document(uidDestino).get()
+                        .addOnSuccessListener { docBarberia ->
+                            val fotoBarberia = docBarberia.getString("fotoPerfil")
+                            if (!fotoBarberia.isNullOrEmpty()) {
+                                Glide.with(this).load(fotoBarberia).circleCrop()
+                                    .into(binding.imgAvatarChat)
+                            }
+                        }
                 }
             }
     }
-
 
     private fun setupRecyclerView() {
         val uidActual = auth.currentUser?.uid ?: return
         adapter = MensajeAdapter(mutableListOf(), uidActual)
 
         val layoutManager = LinearLayoutManager(this).apply {
-            stackFromEnd = true // Mensajes desde abajo
+            stackFromEnd = true
         }
 
         binding.rvMensajes.layoutManager = layoutManager
@@ -90,7 +97,6 @@ class ChatActivity : AppCompatActivity() {
                 adapter.agregarMensaje(mensajeConId)
                 binding.rvMensajes.scrollToPosition(adapter.itemCount - 1)
 
-                // Marcar como leído si es para mí
                 val uidActual = auth.currentUser?.uid ?: return
                 if (mensaje.senderId != uidActual && !mensaje.leido) {
                     rtdb.child("chats/$chatId/mensajes/${snapshot.key}/leido")
@@ -106,21 +112,16 @@ class ChatActivity : AppCompatActivity() {
             }
         }
 
-        rtdb.child("chats/$chatId/mensajes")
-            .addChildEventListener(chatListener!!)
+        rtdb.child("chats/$chatId/mensajes").addChildEventListener(chatListener!!)
     }
 
 
     private fun initListeners() {
-        binding.btnBack.setOnClickListener {
-            finish()
-        }
+        binding.btnBack.setOnClickListener { finish() }
 
         binding.btnEnviar.setOnClickListener {
             val texto = binding.txtMensaje.text.toString().trim()
-            if (texto.isNotEmpty()) {
-                enviarMensaje(texto)
-            }
+            if (texto.isNotEmpty()) enviarMensaje(texto)
         }
     }
 
@@ -135,14 +136,12 @@ class ChatActivity : AppCompatActivity() {
             leido = false
         )
 
-        // Guardar en Realtime Database
         rtdb.child("chats/$chatId/mensajes")
             .push()
             .setValue(mensaje)
             .addOnSuccessListener {
                 binding.txtMensaje.text?.clear()
 
-                // Enviar notificación al destinatario
                 obtenerNombreActual { nombreActual ->
                     NotificacionHelper.nuevoMensaje(
                         uidDestino = uidDestino,
@@ -162,13 +161,20 @@ class ChatActivity : AppCompatActivity() {
         val uid = auth.currentUser?.uid ?: return
         db.collection("users").document(uid).get()
             .addOnSuccessListener { doc ->
-                callback(doc.getString("nombre") ?: "Alguien")
+                if (doc.exists() && !doc.getString("nombre").isNullOrEmpty()) {
+                    callback(doc.getString("nombre") ?: "Alguien")
+                } else {
+                    // Si es barbero buscar en barberia
+                    db.collection("barberia").document(uid).get()
+                        .addOnSuccessListener { docB ->
+                            callback(docB.getString("nombre") ?: "Alguien")
+                        }
+                }
             }
     }
 
-
     private fun generarChatId(uid1: String, uid2: String): String {
-        return if (uid1 < uid2) "${uid1}__${uid2}"  // doble guión bajo
+        return if (uid1 < uid2) "${uid1}__${uid2}"
         else "${uid2}__${uid1}"
     }
 

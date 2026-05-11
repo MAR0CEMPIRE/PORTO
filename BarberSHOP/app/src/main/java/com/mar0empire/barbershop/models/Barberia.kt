@@ -10,7 +10,6 @@ data class Barberia(
     val rating: Double = 0.0,
     val latitud: Double = 0.0,
     val longitud: Double = 0.0,
-    val esDestacada: Boolean = false,
-    val esTop: Boolean = false,
-    val distancia: Double = 0.0 
+    val distancia: Double = 0.0,
+    val servicios: List<String> = emptyList()
 )

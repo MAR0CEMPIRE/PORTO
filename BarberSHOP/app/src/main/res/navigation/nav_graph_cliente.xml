@@ -16,7 +16,7 @@
 
     <fragment
         android:id="@+id/nav_citas"
-        android:name="com.mar0empire.barbershop.main.fragments.cliente.CitasFragment"
+        android:name="com.mar0empire.barbershop.main.fragments.comun.CitasFragment"
         android:label="Citas"/>
 
     <fragment

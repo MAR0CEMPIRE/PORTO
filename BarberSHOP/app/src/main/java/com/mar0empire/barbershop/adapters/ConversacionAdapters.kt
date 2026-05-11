@@ -61,6 +61,7 @@ class ConversacionAdapters(
         holder.itemView.setOnClickListener { onClick(conv) }
     }
 
+
     override fun getItemCount() = conversaciones.size
 
     fun actualizar(nuevas: List<Conversacion>) {

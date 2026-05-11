@@ -32,7 +32,6 @@ class MensajesFragment : Fragment() {
 
     private lateinit var adapter: ConversacionAdapters
     private var todasLasConversaciones = listOf<Conversacion>()
-
     private var conversacionesListener: ValueEventListener? = null
 
     override fun onCreateView(
@@ -67,12 +66,9 @@ class MensajesFragment : Fragment() {
     private fun setupBuscador() {
         binding.etBuscar.editText?.addTextChangedListener { texto ->
             val query = texto.toString().trim().lowercase()
-            val filtradas = if (query.isEmpty()) {
-                todasLasConversaciones
-            } else {
-                todasLasConversaciones.filter {
-                    it.nombreDestino.lowercase().contains(query)
-                }
+            val filtradas = if (query.isEmpty()) todasLasConversaciones
+            else todasLasConversaciones.filter {
+                it.nombreDestino.lowercase().contains(query)
             }
             adapter.actualizar(filtradas)
             mostrarEstadoVacio(filtradas.isEmpty())
@@ -84,12 +80,11 @@ class MensajesFragment : Fragment() {
 
         conversacionesListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                // Verificar que el binding sigue activo
                 if (_binding == null) return
 
-                val chatsDelUsuario = snapshot.children.filter { chatSnap ->
-                    chatSnap.key?.contains(uid) == true
-                }.toList()
+                val chatsDelUsuario = snapshot.children
+                    .filter { it.key?.contains(uid) == true }
+                    .toList()
 
                 if (chatsDelUsuario.isEmpty()) {
                     mostrarEstadoVacio(true)
@@ -103,78 +98,108 @@ class MensajesFragment : Fragment() {
                 chatsDelUsuario.forEach { chatSnap ->
                     val chatId = chatSnap.key ?: run {
                         completados++
+                        if (completados == pendientes) finalizarCarga(conversaciones)
                         return@forEach
                     }
 
-                    val uidDestino = chatId
-                        .split("__")
+                    val uidDestino = chatId.split("__")
                         .firstOrNull { it != uid } ?: run {
                         completados++
+                        if (completados == pendientes) finalizarCarga(conversaciones)
                         return@forEach
                     }
 
                     val mensajes = chatSnap.child("mensajes")
                     val ultimoMensaje = mensajes.children.lastOrNull()
-                    val textoUltimo = ultimoMensaje
-                        ?.child("texto")
+                    val textoUltimo = ultimoMensaje?.child("texto")
                         ?.getValue(String::class.java) ?: ""
-                    val timestamp = ultimoMensaje
-                        ?.child("timestamp")
+                    val timestamp = ultimoMensaje?.child("timestamp")
                         ?.getValue(Long::class.java) ?: 0L
                     val noLeidos = mensajes.children.count { msg ->
-                        val leido = msg.child("leido")
-                            .getValue(Boolean::class.java) ?: false
-                        val sender = msg.child("senderId")
-                            .getValue(String::class.java) ?: ""
+                        val leido = msg.child("leido").getValue(Boolean::class.java) ?: false
+                        val sender = msg.child("senderId").getValue(String::class.java) ?: ""
                         !leido && sender != uid
                     }
 
-                    db.collection("users").document(uidDestino).get()
-                        .addOnSuccessListener { doc ->
-                            if (_binding == null) return@addOnSuccessListener
+                    // ✅ Busca en users Y en barberia
+                    buscarInfoUsuario(uidDestino) { nombre, foto ->
+                        if (_binding == null) return@buscarInfoUsuario
 
-                            val nombre = doc.getString("nombre") ?: "Usuario"
-                            val foto = doc.getString("fotoPerfil") ?: ""
-
-                            conversaciones.add(
-                                Conversacion(
-                                    chatId = chatId,
-                                    uidDestino = uidDestino,
-                                    nombreDestino = nombre,
-                                    fotoDestino = foto,
-                                    ultimoMensaje = textoUltimo,
-                                    timestamp = timestamp,
-                                    noLeidos = noLeidos
-                                )
+                        conversaciones.add(
+                            Conversacion(
+                                chatId = chatId,
+                                uidDestino = uidDestino,
+                                nombreDestino = nombre,
+                                fotoDestino = foto,
+                                ultimoMensaje = textoUltimo,
+                                timestamp = timestamp,
+                                noLeidos = noLeidos
                             )
+                        )
 
-                            completados++
-                            if (completados == pendientes) {
-                                if (_binding == null) return@addOnSuccessListener
-                                val ordenadas = conversaciones
-                                    .sortedByDescending { it.timestamp }
-                                todasLasConversaciones = ordenadas
-                                adapter.actualizar(ordenadas)
-                                mostrarEstadoVacio(ordenadas.isEmpty())
-                            }
-                        }
-                        .addOnFailureListener {
-                            completados++
-                            if (completados == pendientes && _binding != null) {
-                                mostrarEstadoVacio(conversaciones.isEmpty())
-                            }
-                        }
+                        completados++
+                        if (completados == pendientes) finalizarCarga(conversaciones)
+                    }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Verificar binding antes de actualizar UI
                 if (_binding == null) return
                 mostrarEstadoVacio(true)
             }
         }
 
         rtdb.child("chats").addValueEventListener(conversacionesListener!!)
+    }
+
+    private fun buscarInfoUsuario(
+        uid: String,
+        callback: (nombre: String, foto: String) -> Unit
+    ) {
+        db.collection("users").document(uid).get()
+            .addOnSuccessListener { doc ->
+                if (doc.exists()) {
+                    val rol = doc.getString("rol") ?: "cliente"
+
+                    if (rol == "barberia") {
+                        //  Es barbero → usar nombre de la barbería
+                        db.collection("barberia").document(uid).get()
+                            .addOnSuccessListener { docBarberia ->
+                                callback(
+                                    docBarberia.getString("nombre") ?: "Barbería",
+                                    docBarberia.getString("fotoPerfil") ?: ""
+                                )
+                            }
+                            .addOnFailureListener {
+                                callback(doc.getString("nombre") ?: "Usuario", "")
+                            }
+                    } else {
+                        // Es cliente → usar nombre del usuario
+                        callback(
+                            doc.getString("nombre") ?: "Usuario",
+                            doc.getString("fotoPerfil") ?: ""
+                        )
+                    }
+                } else {
+                    callback("Usuario", "")
+                }
+            }
+            .addOnFailureListener {
+                callback("Usuario", "")
+            }
+    }
+
+    private fun finalizarCarga(conversaciones: MutableList<Conversacion>) {
+        if (_binding == null) return
+        val ordenadas = conversaciones.sortedByDescending { it.timestamp }
+        todasLasConversaciones = ordenadas
+
+        val queryActual = binding.etBuscar.editText?.text.toString().trim().lowercase()
+        val filtradas = if (queryActual.isEmpty()) ordenadas
+        else ordenadas.filter { it.nombreDestino.lowercase().contains(queryActual) }
+
+        adapter.actualizar(filtradas)
+        mostrarEstadoVacio(filtradas.isEmpty())
     }
 
     private fun mostrarEstadoVacio(vacio: Boolean) {
@@ -184,7 +209,6 @@ class MensajesFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // Eliminar el listener cuando se destruye la vista
         conversacionesListener?.let {
             rtdb.child("chats").removeEventListener(it)
         }

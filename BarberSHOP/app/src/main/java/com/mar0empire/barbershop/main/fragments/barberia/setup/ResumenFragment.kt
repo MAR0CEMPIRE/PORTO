@@ -13,7 +13,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mar0empire.barbershop.auth.LoginActivity
 import com.mar0empire.barbershop.databinding.FragmentBarberiaResumenBinding
-import com.mar0empire.barbershop.main.activities.MainBarberiaActivity
 import com.mar0empire.barbershop.viewmodel.SetUpBarberiaViewModel
 
 class ResumenFragment : Fragment() {

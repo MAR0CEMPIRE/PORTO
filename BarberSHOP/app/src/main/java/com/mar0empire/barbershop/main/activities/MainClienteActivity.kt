@@ -30,7 +30,7 @@ class MainClienteActivity : AppCompatActivity() {
         setupNavegacion()
         pedirPermisoNotificaciones()
 
-        // ⚠️ PRUEBA — ELIMINAR ANTES DE ENTREGAR EL TFG
+        //  PRUEBA — ELIMINAR ANTES DE ENTREGAR EL TFG
         enviarNotificacionBienvenidaPrueba()
     }
     private fun setupNavegacion() {
@@ -55,7 +55,7 @@ class MainClienteActivity : AppCompatActivity() {
         }
     }
 
-    // ⚠️ PRUEBA — ELIMINAR ANTES DE ENTREGAR EL TFG
+    //  PRUEBA — ELIMINAR ANTES DE ENTREGAR EL TFG
     private fun enviarNotificacionBienvenidaPrueba() {
         Handler(Looper.getMainLooper()).postDelayed({
             NotificacionManager.mostrar(

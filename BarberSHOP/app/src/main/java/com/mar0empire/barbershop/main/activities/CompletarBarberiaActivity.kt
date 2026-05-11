@@ -19,7 +19,7 @@ class CompletarBarberiaActivity : AppCompatActivity() {
         const val PASO_HORARIOS = "horarios"
         const val PASO_SERVICIOS = "servicios"
 
-        // ✅ Extras del registro nuevo
+        //  Extras del registro nuevo
         const val EXTRA_NOMBRE = "nombre"
         const val EXTRA_EMAIL = "email"
         const val EXTRA_PASSWORD = "password"
@@ -32,7 +32,7 @@ class CompletarBarberiaActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this)[SetUpBarberiaViewModel::class.java]
 
-        // ✅ Guardar datos del registro en el ViewModel si vienen del RegisterActivity
+        //  Guardar datos del registro en el ViewModel si vienen del RegisterActivity
         intent.getStringExtra(EXTRA_NOMBRE)?.let { viewModel.nombreUsuario = it }
         intent.getStringExtra(EXTRA_EMAIL)?.let { viewModel.emailRegistro = it }
         intent.getStringExtra(EXTRA_PASSWORD)?.let { viewModel.passwordRegistro = it }

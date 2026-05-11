@@ -79,7 +79,6 @@ class HorasAdapter(
 
     override fun getItemCount() = horas.size
 
-    // ─── Actualizar horas desde fuera ────────────────────────────────────────
     fun actualizarHoras(nuevasHoras: List<HoraItem>) {
         horas.clear()
         horas.addAll(nuevasHoras)

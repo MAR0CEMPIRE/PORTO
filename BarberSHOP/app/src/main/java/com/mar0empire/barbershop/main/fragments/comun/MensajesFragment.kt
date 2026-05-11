@@ -121,7 +121,7 @@ class MensajesFragment : Fragment() {
                         !leido && sender != uid
                     }
 
-                    // ✅ Busca en users Y en barberia
+                    //  Busca en users Y en barberia
                     buscarInfoUsuario(uidDestino) { nombre, foto ->
                         if (_binding == null) return@buscarInfoUsuario
 
@@ -162,7 +162,7 @@ class MensajesFragment : Fragment() {
                     val rol = doc.getString("rol") ?: "cliente"
 
                     if (rol == "barberia") {
-                        //  Es barbero → usar nombre de la barbería
+                        //  Es barbero -> usar nombre de la barbería
                         db.collection("barberia").document(uid).get()
                             .addOnSuccessListener { docBarberia ->
                                 callback(

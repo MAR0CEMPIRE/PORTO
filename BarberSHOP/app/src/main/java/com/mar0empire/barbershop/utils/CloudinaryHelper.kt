@@ -19,7 +19,6 @@ object CloudinaryHelper {
 
     private val client = OkHttpClient()
 
-    // Ahora usará los valores de tu local.properties
     private val cloudName = "dbxsj3lak"
     private val uploadPreset = "barbershop_preset"
 

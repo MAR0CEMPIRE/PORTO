@@ -29,6 +29,5 @@ class SetUpBarberiaViewModel : ViewModel() {
         HorarioDia("Domingo", false)
     )
 
-    // ─── Servicios ───────────────────────────────────────────────────────────
     val servicios: MutableList<Servicio> = mutableListOf()
 }

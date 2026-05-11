@@ -70,7 +70,7 @@ class RegisterActivity : AppCompatActivity() {
         if (rolSeleccionado == "cliente") {
             registrarCliente(nombre, email, password)
         } else {
-            // Barbería → ir al wizard
+            // Barbería -> ir al wizard
             startActivity(
                 Intent(this, CompletarBarberiaActivity::class.java).apply {
                     putExtra("nombre", nombre)

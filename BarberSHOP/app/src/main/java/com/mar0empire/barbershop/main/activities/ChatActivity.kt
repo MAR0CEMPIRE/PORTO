@@ -56,7 +56,7 @@ class ChatActivity : AppCompatActivity() {
     private fun setupUI() {
         binding.txtNombreChat.text = nombreDestino
 
-        // ✅ Buscar foto en users primero, luego en barberia
+        //  Buscar foto en users primero, luego en barberia
         db.collection("users").document(uidDestino).get()
             .addOnSuccessListener { doc ->
                 val foto = if (doc.exists()) doc.getString("fotoPerfil") else null
